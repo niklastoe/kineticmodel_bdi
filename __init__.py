@@ -132,21 +132,26 @@ class KineticModel(object):
         else:
             self.modeled_data = modeled_data
 
-    def reaction_order_plots(self):
+    def reaction_order_plots(self, compare_model=True):
         fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(10, 5), sharex=True)
 
-        (self.exp_data / 100).plot(style='o', ax=axes[0], legend=False)
-        axes[0].set_prop_cycle(None)
-        (self.modeled_data / 100).plot(style='--x', ax=axes[0], legend=False)
         axes[0].set_yscale('log')
         axes[0].set_ylabel(r'$\log_{10}$ [activity]')
 
-        (100 / self.exp_data).plot(style='o', ax=axes[1], legend=False)
-        axes[1].set_prop_cycle(None)
-        (100 / self.modeled_data).plot(style='--x', ax=axes[1], legend=False)
-
         axes[1].set_ylabel('1/ rel. activity')
         axes[1].set_xlabel('time / h')
+
+        if compare_model:
+            (self.exp_data / 100).plot(style='o', ax=axes[0], legend=False)
+            axes[0].set_prop_cycle(None)
+            (self.modeled_data / 100).plot(style='--x', ax=axes[0], legend=False)
+
+            (100 / self.exp_data).plot(style='o', ax=axes[1], legend=False)
+            axes[1].set_prop_cycle(None)
+            (100 / self.modeled_data).plot(style='--x', ax=axes[1], legend=False)
+        else:
+            (self.exp_data / 100).plot(style='-o', ax=axes[0], legend=False)
+            (100 / self.exp_data).plot(style='-o', ax=axes[1], legend=False)
 
     def flattened_available_exp_data(self):
         """return a flattened array of the available experimental data. This is helpful for parameter fitting"""
