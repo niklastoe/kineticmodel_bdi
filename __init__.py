@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 from scipy.optimize import curve_fit
 
+
 class KineticModel(object):
     """quickly build a kinetic model fitting """
 
@@ -22,8 +23,20 @@ class KineticModel(object):
         self.species = self.get_species()
         self.reaction_rates = reaction_rates
         self.rate_sliders = self.create_rate_sliders()
+
+        self.educts = self.identify_educts()
+        self.products = ['P']
+
         self.model = self.create_reaction_system(reaction_rates)
         self.model_exp_data()
+
+    def identify_educts(self):
+        if 'T' in self.species:
+            return ['T']
+        elif 'A' in self.species and 'D' in self.species:
+            return ['A', 'D']
+        else:
+            raise ValueError('Could not identify educts of this reaction system!')
 
     def get_starting_concentration(self):
         """deduce starting concentrations from the name of the DF
@@ -106,19 +119,18 @@ class KineticModel(object):
         for conc in modeled_data.columns:
             curr_starting_conc[self.studied_concentration] = conc
             concentrations = self.evaluate_system(curr_starting_conc, modeled_data.index)
+            educts_starting_conc = concentrations[self.educts].loc[0].sum()
+
             if observable == 'educt':
                 # check remaining concentration of educts
-                observed_activity = concentrations['T']
-
-                # observed_activity = concentrations['A']  # construction
-                # observed_activity += concentrations['D']  # construction
+                observed_activity = concentrations[self.educts].sum(axis=1)
             elif observable == 'product':
                 # check how much product has been created and subtract it from starting concentration of educt
-                observed_activity = concentrations['P']  # construction
-                observed_activity = curr_starting_conc['T'] - observed_activity # construction
+                observed_activity = concentrations[self.products].sum(axis=1)
+                observed_activity = educts_starting_conc - observed_activity
             else:
                 raise ValueError('Unknown observable!')
-            modeled_data[conc] = observed_activity / curr_starting_conc['T'] # construction
+            modeled_data[conc] = observed_activity / educts_starting_conc
 
         # convert it to % of starting concentration
         modeled_data *= 100
