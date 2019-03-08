@@ -97,7 +97,6 @@ class KineticModel(object):
             self.exp_data.plot(style='-o', legend=False)
 
         plt.ylabel('% initial activity')
-        plt.xlabel('time')
         plt.ylim(-5, 105)
 
     def model_exp_data(self, observable='product', only_exp_data=True, return_only=False):
@@ -139,7 +138,6 @@ class KineticModel(object):
         axes[0].set_ylabel(r'$\log_{10}$ [activity]')
 
         axes[1].set_ylabel('1/ rel. activity')
-        axes[1].set_xlabel('time / h')
 
         if compare_model:
             (self.exp_data / 100).plot(style='o', ax=axes[0], legend=False)
