@@ -96,7 +96,7 @@ class KineticModel(object):
         self.reaction_rates = kwargs
         self.model = self.create_reaction_system()
         self.set_binding_sites()
-        self.starting_concentration()
+        self.get_starting_concentration()
         self.model_exp_data()
         self.show_exp_data()
 
@@ -142,7 +142,7 @@ class KineticModel(object):
 
         for conc in modeled_data.columns:
             curr_starting_conc[self.studied_concentration] = conc
-            if 'poly' in curr_starting_conc[self.studied_concentration]:
+            if 'poly' in self.studied_concentration:
                 curr_starting_conc[self.studied_concentration] *= self.binding_sites
             concentrations = self.evaluate_system(curr_starting_conc, modeled_data.index)
             educts_starting_conc = concentrations[self.educts].loc[0].sum()
