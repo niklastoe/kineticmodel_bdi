@@ -16,12 +16,15 @@ class KineticModel(object):
     def __init__(self, exp_data, reaction_list_input, reaction_rates=None):
         self.exp_data = exp_data
         self.studied_concentration = exp_data.columns.name
-        self.starting_concentration = self.get_starting_concentration()
 
         self.reaction_list_input = reaction_list_input
 
         self.species = self.get_species()
         self.reaction_rates = reaction_rates
+
+        self.set_binding_sites()
+        self.get_starting_concentration()
+
         self.rate_sliders = self.create_rate_sliders()
 
         self.educts = self.identify_educts()
@@ -29,6 +32,13 @@ class KineticModel(object):
 
         self.model = self.create_reaction_system()
         self.model_exp_data()
+
+    def set_binding_sites(self):
+        """keep self.binding_sites updated"""
+        if 'binding_sites' in self.reaction_rates:
+            self.binding_sites = self.reaction_rates['binding_sites']
+        else:
+            self.binding_sites = 1.0
 
     def identify_educts(self):
         if 'T' in self.species:
@@ -42,9 +52,15 @@ class KineticModel(object):
         """deduce starting concentrations from the name of the DF
         if that does not work, there are no starting concentrations"""
         try:
-            return {self.exp_data.name[0]: self.exp_data.name[1]}
+            species_name = self.exp_data.name[0]
+            species_concentration = self.exp_data.name[1]
+            if 'poly' in species_name:
+                species_concentration *= self.binding_sites
+            starting_concentration = {species_name: species_concentration}
         except:
-            return {}
+            starting_concentration = {}
+
+        self.starting_concentration = starting_concentration
 
     @staticmethod
     def create_reaction(reaction_input, rates_dict):
@@ -119,6 +135,8 @@ class KineticModel(object):
 
         for conc in modeled_data.columns:
             curr_starting_conc[self.studied_concentration] = conc
+            if 'poly' in curr_starting_conc[self.studied_concentration]:
+                curr_starting_conc[self.studied_concentration] *= self.binding_sites
             concentrations = self.evaluate_system(curr_starting_conc, modeled_data.index)
             educts_starting_conc = concentrations[self.educts].loc[0].sum()
 
