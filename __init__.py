@@ -95,11 +95,18 @@ class KineticModel(object):
         """interactively create a reaction system and compare modeled results to experimental data"""
         self.reaction_rates = kwargs
         self.model = self.create_reaction_system()
+        self.set_binding_sites()
+        self.starting_concentration()
         self.model_exp_data()
         self.show_exp_data()
 
     def create_rate_sliders(self):
-        return {key: create_rate_slider(key, self.reaction_rates) for key in self.get_reaction_constant_keys()}
+        slider_names = self.get_reaction_constant_keys()
+
+        # only create a slider if binding_sites was specified in input
+        if 'binding_sites' in self.reaction_rates:
+            slider_names.append('binding_sites')
+        return {key: create_rate_slider(key, self.reaction_rates) for key in slider_names}
 
     def interactive_plot(self):
         ipywidgets.interact(self.interactive_rsys, **self.rate_sliders)
