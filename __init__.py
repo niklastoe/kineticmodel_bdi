@@ -27,7 +27,7 @@ class KineticModel(object):
         self.educts = self.identify_educts()
         self.products = ['P']
 
-        self.model = self.create_reaction_system(reaction_rates)
+        self.model = self.create_reaction_system()
         self.model_exp_data()
 
     def identify_educts(self):
@@ -68,16 +68,17 @@ class KineticModel(object):
     def get_reaction_constant_keys(self):
         return [x[-1] for x in self.reaction_list_input]
 
-    def create_reaction_system(self, rates_dict):
+    def create_reaction_system(self):
         """create the reaction system for chempy"""
-        included_reactions = [self.create_reaction(x, rates_dict) for x in self.reaction_list_input]
+        included_reactions = [self.create_reaction(x, self.reaction_rates) for x in self.reaction_list_input]
         included_species = ' '.join(self.species)
 
         return ReactionSystem(included_reactions, included_species)
 
     def interactive_rsys(self, **kwargs):
         """interactively create a reaction system and compare modeled results to experimental data"""
-        self.model = self.create_reaction_system(kwargs)
+        self.reaction_rates = kwargs
+        self.model = self.create_reaction_system()
         self.model_exp_data()
         self.show_exp_data()
 
