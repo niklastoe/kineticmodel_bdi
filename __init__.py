@@ -232,14 +232,15 @@ def create_rate_slider(rate_key, rates_dict=None, slider_range=5):
                                   readout_format='.1f')
 
 
-def optimize_kinetic_model(func_to_optimize, ydata, bounds=5):
-    # to avoid any mislabeling, we get the argument names via inspect (curve_fit uses inspect as well)
-    reaction_rates_names = inspect.getargspec(func_to_optimize).args
-    # the first variable is the trash variable for xdata, drop it
-    reaction_rates_names = reaction_rates_names[1:]
+def optimize_kinetic_model(func_to_optimize, experimental_data, bounds=5):
 
-    starting_values_rates = inspect.getargspec(func_to_optimize).defaults
-    starting_values_rates = np.array(starting_values_rates)
+    # prepare names and starting values for the parameters
+    reaction_rates_guess = get_rates_dict_guess(func_to_optimize)
+    reaction_rates_names = reaction_rates_guess.index
+    starting_values_rates = reaction_rates_guess.values
+
+    # format experimental ydata (the ones the optimizer shall match) by building
+    ydata = KineticModel.format_ydata(experimental_data)
 
     if type(bounds) == int or type(bounds) == float:
         upper_bounds = starting_values_rates + bounds
