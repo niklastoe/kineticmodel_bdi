@@ -97,9 +97,7 @@ class KineticModel(object):
 
     def interactive_rsys(self, **kwargs):
         """interactively create a reaction system and compare modeled results to experimental data"""
-        # update reaction rates, keep previous order
-        sorted_reaction_rates = pd.Series(kwargs)[self.reaction_rates.index]
-        self.reaction_rates = sorted_reaction_rates
+        self.reaction_rates.update(pd.Series(kwargs))
         self.model = self.create_reaction_system()
         self.set_binding_sites()
         self.get_starting_concentration()
