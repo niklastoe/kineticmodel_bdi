@@ -81,8 +81,12 @@ class KineticModel(object):
         unique_species.sort()
         return unique_species
 
-    def get_reaction_constant_keys(self):
-        return [x[-1] for x in self.reaction_list_input]
+    def get_reaction_constant_names(self):
+        """return list of reaction constant names, sorted in the same way as in self.reaction_rates
+        this is necessary because self.reaction_rates can contain items which do not correspond to reaction rates"""
+        reaction_constant_names =  [x[-1] for x in self.reaction_list_input]
+        sorted_reaction_constant_names = [x for x in self.reaction_rates.index if x in reaction_constant_names]
+        return sorted_reaction_constant_names
 
     def create_reaction_system(self):
         """create the reaction system for chempy"""
@@ -93,7 +97,9 @@ class KineticModel(object):
 
     def interactive_rsys(self, **kwargs):
         """interactively create a reaction system and compare modeled results to experimental data"""
-        self.reaction_rates = kwargs
+        # update reaction rates, keep previous order
+        sorted_reaction_rates = pd.Series(kwargs)[self.reaction_rates.index]
+        self.reaction_rates = sorted_reaction_rates
         self.model = self.create_reaction_system()
         self.set_binding_sites()
         self.get_starting_concentration()
@@ -262,4 +268,4 @@ def get_rates_dict_guess(func_to_inspect):
     """create reaction rate dictionary from keywords of function"""
     func_inspection = inspect.getargspec(func_to_inspect)
     rates_ds = pd.Series(func_inspection.defaults, index=func_inspection.args[1:])
-    return rates_ds.to_dict()
+    return rates_ds
