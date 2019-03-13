@@ -189,19 +189,21 @@ class KineticModel(object):
             (self.exp_data / 100).plot(style='-o', ax=axes[0], legend=False)
             (100 / self.exp_data).plot(style='-o', ax=axes[1], legend=False)
 
-    def flattened_available_exp_data(self):
+    def ydata_exp(self):
         """return a flattened array of the available experimental data. This is helpful for parameter fitting"""
-        flattened_array = self.exp_data.values.flatten()
-        return flattened_array[~np.isnan(flattened_array)]
+        return self.format_ydata(self.exp_data)
 
-    def flattened_available_modeled_data(self):
+    def ydata_model(self):
         """return a flattened array of the modeled data corresponding to available experimental data."""
-
         modeled_data_array = self.model_exp_data(only_exp_data=True, return_only=True)
+        return self.format_ydata(modeled_data_array)
 
-        flattened_modeled_array = modeled_data_array.values.flatten()
-
-        return flattened_modeled_array[~np.isnan(flattened_modeled_array)]
+    @staticmethod
+    def format_ydata(data_array):
+        """format an array so that it can be accepted as ydata by scipy.optimize.curve_fit
+        1d, no values that are np.nan"""
+        flattened_array = data_array.values.flatten()
+        return flattened_array[~np.isnan(flattened_array)]
 
 
 def create_rate_slider(rate_key, rates_dict=None, slider_range=5):
@@ -252,7 +254,7 @@ def retrieve_ydata(experimental_data, reactions_list, reaction_rates):
     this only requires adapting the input of the experimental data"""
     parametrized_model = KineticModel(experimental_data, reactions_list, reaction_rates)
 
-    ydata = parametrized_model.flattened_available_modeled_data()
+    ydata = parametrized_model.ydata_model()
     return ydata
 
 
