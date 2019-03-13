@@ -260,7 +260,8 @@ def optimize_kinetic_model(func_to_optimize, ydata, bounds=5):
 def retrieve_ydata(experimental_data, reactions_list, reaction_rates):
     """model experimental data and format it like curve_fit needs it
     this only requires adapting the input of the experimental data"""
-    parametrized_model = KineticModel(experimental_data, reactions_list, reaction_rates)
+    reaction_rates_ds = pd.Series(reaction_rates)
+    parametrized_model = KineticModel(experimental_data, reactions_list, reaction_rates_ds)
 
     ydata = parametrized_model.ydata_model()
     return ydata
