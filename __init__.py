@@ -20,7 +20,8 @@ class KineticModel(object):
         self.reaction_list_input = reaction_list_input
 
         self.species = self.get_species()
-        self.reaction_rates = reaction_rates
+        # avoid that fitted reaction rates which are fed-in are altered
+        self.reaction_rates = copy.deepcopy(reaction_rates)
 
         self.set_binding_sites()
         self.get_starting_concentration()
