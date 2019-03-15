@@ -151,14 +151,10 @@ class KineticModel(object):
             ax = self.exp_data.plot(style='o', legend=False)
             # ensure same styles (esp. colors) are used for experimental and modeled data
             ax.set_prop_cycle(None)
-            # iterating over columns allows to drop nan entries
-            # nan entries disrupt lines
-            for col in self.modeled_data:
-                self.modeled_data[col].dropna().plot(ax=ax, style="--x", legend=False)
+            plot_df_w_nan(self.modeled_data, style="--x", axes=ax)
 
         else:
-            for col in self.exp_data:
-                self.exp_data[col].dropna().plot(style="-o", legend=False)
+            plot_df_w_nan(self.exp_data, style="-o")
 
         plt.ylabel('% initial activity')
         plt.ylim(-5, 105)
@@ -205,16 +201,16 @@ class KineticModel(object):
         axes[1].set_ylabel('1/ rel. activity')
 
         if compare_model:
-            (self.exp_data / 100).plot(style='o', ax=axes[0], legend=False)
+            plot_df_w_nan(self.exp_data / 100, style='o', axes=axes[0])
             axes[0].set_prop_cycle(None)
-            (self.modeled_data / 100).plot(style='--x', ax=axes[0], legend=False)
+            plot_df_w_nan(self.modeled_data / 100, style='--x', axes=axes[0])
 
-            (100 / self.exp_data).plot(style='o', ax=axes[1], legend=False)
+            plot_df_w_nan(100 / self.exp_data, style='o', axes=axes[1])
             axes[1].set_prop_cycle(None)
-            (100 / self.modeled_data).plot(style='--x', ax=axes[1], legend=False)
+            plot_df_w_nan(100 / self.modeled_data, style='--x', axes=axes[1])
         else:
-            (self.exp_data / 100).plot(style='-o', ax=axes[0], legend=False)
-            (100 / self.exp_data).plot(style='-o', ax=axes[1], legend=False)
+            plot_df_w_nan(self.exp_data / 100, style='-o', axes=axes[0])
+            plot_df_w_nan(100 / self.exp_data, style='-o', axes=axes[1])
 
     def ydata_exp(self):
         """return a flattened array of the available experimental data. This is helpful for parameter fitting"""
@@ -232,6 +228,16 @@ class KineticModel(object):
         flattened_array = data_array.values.flatten()
         return flattened_array[~np.isnan(flattened_array)]
 
+
+def plot_df_w_nan(df, style, axes=None):
+    """iterating over columns allows to drop nan entries
+    nan entries disrupt lines"""
+
+    # create axes if necessary
+    if axes is None:
+        axes = plt.axes()
+    for col in df:
+        df[col].dropna().plot(style=style, ax=axes, legend=False)
 
 def create_rate_slider(rate_key, rates_dict=None, slider_range=5):
     """return a continous slider named rate_key with a given start value"""
