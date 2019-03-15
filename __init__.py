@@ -149,10 +149,16 @@ class KineticModel(object):
     def show_exp_data(self, compare_model=True):
         if compare_model:
             ax = self.exp_data.plot(style='o', legend=False)
+            # ensure same styles (esp. colors) are used for experimental and modeled data
             ax.set_prop_cycle(None)
-            self.modeled_data.plot(ax=ax, style="--x", legend=False)
+            # iterating over columns allows to drop nan entries
+            # nan entries disrupt lines
+            for col in self.modeled_data:
+                self.modeled_data[col].dropna().plot(ax=ax, style="--x", legend=False)
+
         else:
-            self.exp_data.plot(style='-o', legend=False)
+            for col in self.exp_data:
+                self.exp_data[col].dropna().plot(style="-o", legend=False)
 
         plt.ylabel('% initial activity')
         plt.ylim(-5, 105)
