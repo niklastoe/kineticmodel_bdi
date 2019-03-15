@@ -286,3 +286,7 @@ def get_rates_dict_guess(func_to_inspect):
     func_inspection = inspect.getargspec(func_to_inspect)
     rates_ds = pd.Series(func_inspection.defaults, index=func_inspection.args[1:])
     return rates_ds
+
+def poly_string(x, y):
+    """generate species string for polymer with"""
+    return r'T$_%d$P$_%d$-poly' % (x, y)
