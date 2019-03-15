@@ -29,7 +29,7 @@ class KineticModel(object):
         self.rate_sliders = self.create_rate_sliders()
 
         self.educts = self.identify_educts()
-        self.products = ['P']
+        self.products = self.identify_products()
 
         self.model = self.create_reaction_system()
         self.model_exp_data()
@@ -48,6 +48,20 @@ class KineticModel(object):
             return ['A', 'D']
         else:
             raise ValueError('Could not identify educts of this reaction system!')
+
+    def identify_products(self):
+        product_species = []
+        for name in self.species:
+            # product will always be called P
+            if 'P' in name:
+                condition_1 = 'P0' not in name
+                condition_2 = 'P$_0' not in name
+                condition_3 = 'P_0' not in name
+
+                if condition_1 and condition_2 and condition_3:
+                    product_species.append(name)
+
+        return product_species
 
     def get_starting_concentration(self):
         """deduce starting concentrations from the name of the DF
