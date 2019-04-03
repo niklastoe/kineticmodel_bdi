@@ -218,8 +218,7 @@ class KineticModel(object):
 
     def ydata_model(self):
         """return a flattened array of the modeled data corresponding to available experimental data."""
-        modeled_data_array = self.model_exp_data(only_exp_data=True, return_only=True)
-        return self.format_ydata(modeled_data_array)
+        return self.format_ydata(self.modeled_data)
 
     @staticmethod
     def format_ydata(data_array):
