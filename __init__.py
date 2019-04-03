@@ -26,8 +26,6 @@ class KineticModel(object):
         self.set_binding_sites()
         self.get_starting_concentration()
 
-        self.rate_sliders = self.create_rate_sliders()
-
         self.educts = self.identify_educts()
         self.products = self.identify_products()
 
@@ -130,7 +128,8 @@ class KineticModel(object):
         return pd.Series(sliders, index=slider_names)
 
     def interactive_plot(self):
-        ipywidgets.interact(self.interactive_rsys, **self.rate_sliders)
+        rate_sliders = self.create_rate_sliders()
+        ipywidgets.interact(self.interactive_rsys, **rate_sliders)
 
     def evaluate_system(self, initial_concentrations, time):
         """evaluate concentration of all species at given times"""
