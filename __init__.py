@@ -30,6 +30,7 @@ class KineticModel(object):
         self.products = self.identify_products()
 
         self.model = self.create_reaction_system()
+        self.odesys, extra = get_odesys(self.model)
         self.model_exp_data()
 
     def set_binding_sites(self):
@@ -133,10 +134,8 @@ class KineticModel(object):
 
     def evaluate_system(self, initial_concentrations, time):
         """evaluate concentration of all species at given times"""
-        odesys, extra = get_odesys(self.model)
-
         c0 = defaultdict(float, initial_concentrations)
-        result = odesys.integrate(time, c0, atol=1e-12, rtol=1e-14)
+        result = self.odesys.integrate(time, c0, atol=1e-12, rtol=1e-14)
 
         # somehow, there's always an array full of zeros: get rid of it
         evaluation = np.array(result.at(time))[:, 0]
