@@ -155,8 +155,6 @@ class KineticModel(object):
         # somehow, there's always an array full of zeros: get rid of it
         evaluation = np.array(result.at(time))[:, 0]
 
-        # format results as DataFrame
-        evaluation = pd.DataFrame(evaluation, columns=self.get_species(), index=time)
         return evaluation
 
     def show_exp_data(self, compare_model=True):
@@ -177,15 +175,18 @@ class KineticModel(object):
                        only_exp_data=True,
                        return_only=False,
                        new_parameters=None):
-        modeled_data = copy.deepcopy(self.exp_data)
+        """model the experimental data and return a pd.DataFrame which matches the format of the experimental one.
+        If new parameters are given, this will use the native (C++) odesys and avoid pandas for speed up!"""
         curr_starting_conc = copy.deepcopy(self.starting_concentration)
 
-        for conc in modeled_data.columns:
+        modeled_data = []
+
+        for conc_idx, conc in enumerate(self.exp_data.columns):
             curr_starting_conc[self.studied_concentration] = conc
             if 'poly' in self.studied_concentration:
                 curr_starting_conc[self.studied_concentration] *= self.binding_sites
             concentrations = self.evaluate_system(curr_starting_conc,
-                                                  modeled_data.index,
+                                                  self.exp_data.index,
                                                   new_parameters=new_parameters)
             educts_starting_conc = [curr_starting_conc[x] for x in self.educts if x in curr_starting_conc]
 
@@ -194,17 +195,26 @@ class KineticModel(object):
                 observed_activity = concentrations[self.educts].sum(axis=1)
             elif observable == 'product':
                 # check how much product has been created and subtract it from starting concentration of educt
-                observed_activity = concentrations[self.products].sum(axis=1)
+                product_indeces = [self.species.index(x) for x in self.products]
+                observed_activity = concentrations[:, product_indeces].sum(axis=1)
                 observed_activity = educts_starting_conc - observed_activity
             else:
                 raise ValueError('Unknown observable!')
-            modeled_data[conc] = observed_activity / educts_starting_conc
+            modeled_data.append(observed_activity / educts_starting_conc)
+
+        modeled_data = np.array(modeled_data).T
 
         # convert it to % of starting concentration
         modeled_data *= 100
 
         if only_exp_data:
-            modeled_data = modeled_data[~np.isnan(self.exp_data)]
+            modeled_data[np.where(np.isnan(self.exp_data))] = np.nan
+
+        # only format as pd.DataFrame if speed is not necessary
+        if new_parameters is None:
+            modeled_data = pd.DataFrame(modeled_data,
+                                        index=self.exp_data.index,
+                                        columns=self.exp_data.columns)
 
         if return_only:
             return modeled_data
