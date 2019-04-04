@@ -1,5 +1,6 @@
 from chempy import Reaction, ReactionSystem
 from chempy.kinetics.ode import get_odesys
+from pyodesys.native import native_sys
 from collections import defaultdict
 import copy
 import inspect
@@ -224,6 +225,9 @@ class KineticModel(object):
         1d, no values that are np.nan"""
         flattened_array = data_array.values.flatten()
         return flattened_array[~np.isnan(flattened_array)]
+
+    def create_native_odesys(self):
+        self.native_odesys = native_sys['cvode'].from_other(self.odesys)
 
 
 def plot_df_w_nan(df, style, axes=None):
