@@ -187,7 +187,7 @@ class KineticModel(object):
             concentrations = self.evaluate_system(curr_starting_conc,
                                                   modeled_data.index,
                                                   new_parameters=new_parameters)
-            educts_starting_conc = concentrations[self.educts].loc[0].sum()
+            educts_starting_conc = [curr_starting_conc[x] for x in self.educts if x in curr_starting_conc]
 
             if observable == 'educt':
                 # check remaining concentration of educts
