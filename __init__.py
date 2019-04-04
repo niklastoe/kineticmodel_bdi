@@ -133,7 +133,7 @@ class KineticModel(object):
         rate_sliders = self.create_rate_sliders()
         ipywidgets.interact(self.interactive_rsys, **rate_sliders)
 
-    def evaluate_system(self, initial_concentrations, time):
+    def evaluate_system(self, initial_concentrations, time, new_parameters=None):
         """evaluate concentration of all species at given times"""
         c0 = defaultdict(float, initial_concentrations)
 
@@ -143,7 +143,15 @@ class KineticModel(object):
         integration_times.sort()
         integration_times = np.array(integration_times)
 
-        result = self.odesys.integrate(integration_times, c0, atol=1e-12, rtol=1e-14)
+        if new_parameters is None:
+            result = self.odesys.integrate(integration_times, c0, atol=1e-12, rtol=1e-14)
+        else:
+            # native odesys requires that all species have a starting concentration
+            for x in self.species:
+                if x not in c0:
+                    c0[x] = 0.0
+            result = self.native_odesys.integrate(integration_times, c0, new_parameters)
+
         # somehow, there's always an array full of zeros: get rid of it
         evaluation = np.array(result.at(time))[:, 0]
 
@@ -164,7 +172,11 @@ class KineticModel(object):
         plt.ylabel('% initial activity')
         plt.ylim(-5, 105)
 
-    def model_exp_data(self, observable='product', only_exp_data=True, return_only=False):
+    def model_exp_data(self,
+                       observable='product',
+                       only_exp_data=True,
+                       return_only=False,
+                       new_parameters=None):
         modeled_data = copy.deepcopy(self.exp_data)
         curr_starting_conc = copy.deepcopy(self.starting_concentration)
 
@@ -172,7 +184,9 @@ class KineticModel(object):
             curr_starting_conc[self.studied_concentration] = conc
             if 'poly' in self.studied_concentration:
                 curr_starting_conc[self.studied_concentration] *= self.binding_sites
-            concentrations = self.evaluate_system(curr_starting_conc, modeled_data.index)
+            concentrations = self.evaluate_system(curr_starting_conc,
+                                                  modeled_data.index,
+                                                  new_parameters=new_parameters)
             educts_starting_conc = concentrations[self.educts].loc[0].sum()
 
             if observable == 'educt':
