@@ -20,7 +20,7 @@ class KineticModel(object):
 
         self.reaction_list_input = reaction_list_input
 
-        self.species = self.get_species()
+        self.species = self.identify_species()
         # avoid that input reaction rates are altered, e.g. by self.interactive_plot
         self.reaction_rates = copy.deepcopy(reaction_rates)
 
@@ -44,6 +44,7 @@ class KineticModel(object):
             self.binding_sites = 1.0
 
     def identify_educts(self):
+        """find all species which are considered educts. This is based on my trypsin models"""
         if 'T' in self.species:
             return ['T']
         elif 'A' in self.species and 'D' in self.species:
@@ -52,10 +53,13 @@ class KineticModel(object):
             raise ValueError('Could not identify educts of this reaction system!')
 
     def identify_products(self):
+        """find all species which are considered educts.
+        This function assumes that all of those species contain a capital P"""
         product_species = []
         for name in self.species:
             # product will always be called P
             if 'P' in name:
+                # sometimes, there will be species which can carry numerous P, check that it's not 0
                 condition_1 = 'P0' not in name
                 condition_2 = 'P$_0' not in name
                 condition_3 = 'P_0' not in name
@@ -85,7 +89,7 @@ class KineticModel(object):
         reaction = Reaction(educts, products, 10 ** rates_dict[reaction_constant_key])
         return reaction
 
-    def get_species(self):
+    def identify_species(self):
         species = []
 
         for reactant in [0, 1]:
