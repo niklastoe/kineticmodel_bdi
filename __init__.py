@@ -250,11 +250,18 @@ class KineticModel(object):
         """return a flattened array of the modeled data corresponding to available experimental data."""
         return self.format_ydata(self.modeled_data)
 
+    def ydata_model_new_parameters(self, new_parameters):
+        new_modeled_data = self.model_exp_data(new_parameters=new_parameters, return_only=True)
+        return self.format_ydata(new_modeled_data)
+
     @staticmethod
     def format_ydata(data_array):
         """format an array so that it can be accepted as ydata by scipy.optimize.curve_fit
         1d, no values that are np.nan"""
-        flattened_array = data_array.values.flatten()
+        if type(data_array) == pd.core.frame.DataFrame:
+            flattened_array = data_array.values.flatten()
+        else:
+            flattened_array = data_array.flatten()
         return flattened_array[~np.isnan(flattened_array)]
 
     def create_native_odesys(self):
