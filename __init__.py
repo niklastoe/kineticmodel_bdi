@@ -136,9 +136,9 @@ class KineticModel(object):
         """evaluate concentration of all species at given times"""
         c0 = defaultdict(float, initial_concentrations)
 
-        # add a very early integration step, this helps somehow with stability
-        early_step = time[1] / 1000 # it should be very early indeed
-        integration_times = list(time) + [early_step]
+        # add early integration steps, this helps somehow with stability
+        early_steps = [time[1] / 10**i for i in np.arange(1,5)] # it should be very early indeed
+        integration_times = list(time) + early_steps
         integration_times.sort()
         integration_times = np.array(integration_times)
 
