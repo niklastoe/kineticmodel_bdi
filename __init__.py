@@ -24,12 +24,14 @@ class KineticModel(object):
         # avoid that input reaction rates are altered, e.g. by self.interactive_plot
         self.reaction_rates = copy.deepcopy(reaction_rates)
 
-        self.set_binding_sites()
-        self.get_starting_concentration()
-
         self.educts = self.identify_educts()
         self.products = self.identify_products()
 
+        self.setup_and_run_model()
+
+    def setup_and_run_model(self):
+        self.set_binding_sites()
+        self.get_starting_concentration()
         self.model = self.create_reaction_system()
         self.odesys, extra = get_odesys(self.model)
         self.model_exp_data()
@@ -113,11 +115,7 @@ class KineticModel(object):
     def interactive_rsys(self, **kwargs):
         """interactively create a reaction system and compare modeled results to experimental data"""
         self.reaction_rates.update(pd.Series(kwargs))
-        self.model = self.create_reaction_system()
-        self.odesys, extra = get_odesys(self.model)
-        self.set_binding_sites()
-        self.get_starting_concentration()
-        self.model_exp_data()
+        self.setup_and_run_model()
         self.show_exp_data()
 
     def create_rate_sliders(self):
