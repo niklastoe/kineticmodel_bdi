@@ -21,7 +21,7 @@ class KineticModel(object):
         self.reaction_list_input = reaction_list_input
 
         self.species = self.get_species()
-        # avoid that fitted reaction rates which are fed-in are altered
+        # avoid that input reaction rates are altered, e.g. by self.interactive_plot
         self.reaction_rates = copy.deepcopy(reaction_rates)
 
         self.set_binding_sites()
