@@ -114,6 +114,7 @@ class KineticModel(object):
         """interactively create a reaction system and compare modeled results to experimental data"""
         self.reaction_rates.update(pd.Series(kwargs))
         self.model = self.create_reaction_system()
+        self.odesys, extra = get_odesys(self.model)
         self.set_binding_sites()
         self.get_starting_concentration()
         self.model_exp_data()
