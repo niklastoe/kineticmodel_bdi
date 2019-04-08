@@ -140,12 +140,21 @@ class KineticModel(object):
         integration_times.sort()
         integration_times = np.array(integration_times)
 
-        def convert_parameters(input_ds):
+        def convert_parameters(input_parameters):
             """convert pd.Series to dict where all rates are 10**x
             WARNING: you cannot pass the pd.Series directly,
             it will be treated like my_ds.values and rates will be wrongly associated!!"""
 
-            return (10 ** input_ds).to_dict()
+            input_type = type(input_parameters)
+            if input_type == pd.core.series.Series:
+                return (10 ** input_parameters).to_dict()
+            elif input_type == dict:
+                formatted_parameters = {}
+                for x in input_parameters:
+                    formatted_parameters[x] = 10 ** input_parameters[x]
+                return formatted_parameters
+            else:
+                raise ValueError('New parameters must either be pd.Series or dictionary!!')
 
         if new_parameters is None:
             result = self.odesys.integrate(integration_times, c0, convert_parameters(self.reaction_rates),
