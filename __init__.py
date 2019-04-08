@@ -33,7 +33,7 @@ class KineticModel(object):
         self.set_binding_sites()
         self.get_starting_concentration()
         self.model = self.create_reaction_system()
-        self.odesys, extra = get_odesys(self.model)
+        self.odesys, extra = get_odesys(self.model, include_params=False)
         self.model_exp_data()
 
     def set_binding_sites(self):
@@ -83,12 +83,6 @@ class KineticModel(object):
 
         self.starting_concentration = starting_concentration
 
-    @staticmethod
-    def create_reaction(reaction_input, rates_dict):
-        educts, products, reaction_constant_key = reaction_input
-        reaction = Reaction(educts, products, 10 ** rates_dict[reaction_constant_key])
-        return reaction
-
     def identify_species(self):
         species = []
 
@@ -111,7 +105,7 @@ class KineticModel(object):
 
     def create_reaction_system(self):
         """create the reaction system for chempy"""
-        included_reactions = [self.create_reaction(x, self.reaction_rates) for x in self.reaction_list_input]
+        included_reactions = [Reaction(*x) for x in self.reaction_list_input]
         included_species = ' '.join(self.species)
 
         return ReactionSystem(included_reactions, included_species)
@@ -146,14 +140,22 @@ class KineticModel(object):
         integration_times.sort()
         integration_times = np.array(integration_times)
 
+        def convert_parameters(input_ds):
+            """convert pd.Series to dict where all rates are 10**x
+            WARNING: you cannot pass the pd.Series directly,
+            it will be treated like my_ds.values and rates will be wrongly associated!!"""
+
+            return (10 ** input_ds).to_dict()
+
         if new_parameters is None:
-            result = self.odesys.integrate(integration_times, c0, atol=1e-12, rtol=1e-14)
+            result = self.odesys.integrate(integration_times, c0, convert_parameters(self.reaction_rates),
+                                           atol=1e-12, rtol=1e-14)
         else:
             # native odesys requires that all species have a starting concentration
             for x in self.species:
                 if x not in c0:
                     c0[x] = 0.0
-            result = self.native_odesys.integrate(integration_times, c0, new_parameters)
+            result = self.native_odesys.integrate(integration_times, c0, convert_parameters(new_parameters))
 
         # somehow, there's always an array full of zeros: get rid of it
         evaluation = np.array(result.at(time))[:, 0]

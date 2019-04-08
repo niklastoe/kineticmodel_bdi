@@ -16,8 +16,8 @@ def regular_autolysis_Nord1956():
 
     reactions = []
 
-    reactions.append([{'A': 1}, {'D': 1}, 'AD'])
-    reactions.append([{'D': 1}, {'A': 1}, 'DA'])
+    reactions.append([{'A': 1}, {'D': 1}, 'k_AD'])
+    reactions.append([{'D': 1}, {'A': 1}, 'k_DA'])
 
     reactions.append([{'A': 1, 'D': 1}, {'AD': 1}, 'TT_association'])
     reactions.append([{'AD': 1}, {'A': 1, 'D': 1}, 'TT_dissociation'])
