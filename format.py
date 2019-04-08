@@ -12,7 +12,7 @@ def michaelis_constant(parameters):
 def kad_equilibrium(parameters):
     """calculate equilibrium constant for A <-> D equilibrium
     K_AD = k_{D->A} / k_{A->D}"""
-    return parameters['DA'] - parameters['AD']
+    return parameters['k_DA'] - parameters['k_AD']
 
 
 def catalytic_efficiency(parameters):
@@ -78,8 +78,8 @@ def rename_parameters(parameters):
                    'likelihood': r'$p(D | \theta)$',
                    'KAD': r'$K_{AD}$',
                    'KKM': r'$k_{cat}$ / $K_M$',
-                   'AD': r'$k_{AD}$',
-                   'DA': r'$k_{DA}$',
+                   'k_AD': r'$k_{AD}$',
+                   'k_DA': r'$k_{DA}$',
                    'TT_association': r'$k_{f}$',
                    'TT_dissociation': r'$k_{r}$',
                    'TP_dissociation': r'$k_{TP}$',
