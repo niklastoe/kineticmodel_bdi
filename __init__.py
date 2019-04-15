@@ -171,7 +171,7 @@ class KineticModel(object):
 
         return evaluation
 
-    def show_exp_data(self, compare_model=True):
+    def show_exp_data(self, compare_model=True, legend=False):
         if compare_model:
             ax = self.exp_data.plot(style='o', legend=False)
             # ensure same styles (esp. colors) are used for experimental and modeled data
@@ -183,6 +183,8 @@ class KineticModel(object):
 
         plt.ylabel('% initial activity')
         plt.ylim(-5, 105)
+        if legend:
+            plt.legend(self.exp_data.columns)
 
     def model_exp_data(self,
                        observable='product',
