@@ -171,6 +171,18 @@ class KineticModel(object):
 
         return evaluation
 
+    def evaluate_to_df(self, *args, **kwargs):
+        """evaluate_system does not use pandas to save time. This is a wrapper to format everything
+        nicely in a DataFrame if necessary"""
+        concentrations = self.evaluate_system(*args, **kwargs)
+
+        # identify time
+        if 'time' in kwargs:
+            time = kwargs['time']
+        else:
+            time = args[1]
+        return pd.DataFrame(concentrations, columns=self.species, index=time)
+
     def show_exp_data(self, compare_model=True, legend=False):
         if compare_model:
             ax = self.exp_data.plot(style='o', legend=False)
