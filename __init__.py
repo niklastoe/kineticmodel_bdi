@@ -269,26 +269,43 @@ class KineticModel(object):
             plot_df_w_nan(self.exp_data / 100, style='-o', axes=axes[0])
             plot_df_w_nan(100 / self.exp_data, style='-o', axes=axes[1])
 
-    def ydata_exp(self):
+    def ydata_exp(self, percentage=True):
         """return a flattened array of the available experimental data. This is helpful for parameter fitting"""
-        return self.format_ydata(self.exp_data)
+        if percentage:
+            return self.format_ydata(self.exp_data)
+        else:
+            return self.format_ydata(self.exp_data, self.exp_data.columns)
 
-    def ydata_model(self):
+    def ydata_model(self, percentage=True):
         """return a flattened array of the modeled data corresponding to available experimental data."""
-        return self.format_ydata(self.modeled_data)
+        if percentage:
+            return self.format_ydata(self.modeled_data)
+        else:
+            return self.format_ydata(self.modeled_data, self.exp_data.columns)
 
-    def ydata_model_new_parameters(self, new_parameters):
+    def ydata_model_new_parameters(self, new_parameters, percentage=True):
         new_modeled_data = self.model_exp_data(new_parameters=new_parameters, return_only=True)
-        return self.format_ydata(new_modeled_data)
+        if percentage:
+            return self.format_ydata(new_modeled_data)
+        else:
+            return self.format_ydata(new_modeled_data, self.exp_data.columns)
 
     @staticmethod
-    def format_ydata(data_array):
+    def format_ydata(data_array, concentration=None):
         """format an array so that it can be accepted as ydata by scipy.optimize.curve_fit
-        1d, no values that are np.nan"""
+        1d, no values that are np.nan
+        By default, it will return data as % of initial activity, it can also convert to concentration (if given)"""
         if type(data_array) == pd.core.frame.DataFrame:
-            flattened_array = data_array.values.flatten()
+            organized_array = data_array.values
         else:
-            flattened_array = data_array.flatten()
+            organized_array = data_array
+
+        # transform from percentage to concentration
+        if concentration is not None:
+            organized_array = (np.array(concentration).reshape(3, 1) * organized_array.T / 100).T
+
+        flattened_array = organized_array.flatten()
+
         return flattened_array[~np.isnan(flattened_array)]
 
     def create_native_odesys(self):
