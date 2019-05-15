@@ -54,14 +54,14 @@ class KineticModel(object):
             return 100. / x
 
         options['invert'] = {'func': invert,
-                                     'ylabel': '1 / rel. activity'}
+                             'ylabel': '1 / rel. activity'}
 
         # absolute
         def absolute(x):
             return np.multiply(x / 100, self.exp_data.columns.values)
         options['absolute'] = {'func': absolute,
                                'ylabel': '[T] / M',
-                              'ylim': (0, max(self.exp_data.columns)*1.05)}
+                               'ylim': (0, max(self.exp_data.columns)*1.05)}
 
         # log10
         options['log10'] = {'func': np.log10,
@@ -132,7 +132,7 @@ class KineticModel(object):
     def get_reaction_constant_names(self):
         """return list of reaction constant names, sorted in the same way as in self.reaction_rates
         this is necessary because self.reaction_rates can contain items which do not correspond to reaction rates"""
-        reaction_constant_names =  [x[-1] for x in self.reaction_list_input]
+        reaction_constant_names = [x[-1] for x in self.reaction_list_input]
         sorted_reaction_constant_names = [x for x in self.reaction_rates.index if x in reaction_constant_names]
         return sorted_reaction_constant_names
 
@@ -345,6 +345,7 @@ def plot_df_w_nan(df, style, axes=None):
     for col in df:
         df[col].dropna().plot(style=style, ax=axes, legend=False)
 
+
 def create_rate_slider(rate_key, rates_dict=None, slider_range=5):
     """return a continous slider named rate_key with a given start value"""
     if rates_dict is None:
@@ -404,6 +405,7 @@ def get_rates_dict_guess(func_to_inspect):
     func_inspection = inspect.getargspec(func_to_inspect)
     rates_ds = pd.Series(func_inspection.defaults, index=func_inspection.args[1:])
     return rates_ds
+
 
 def poly_string(x, y):
     """generate species string for polymer with"""
