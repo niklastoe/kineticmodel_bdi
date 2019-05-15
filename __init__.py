@@ -10,6 +10,8 @@ import numpy as np
 import pandas as pd
 from scipy.optimize import curve_fit
 
+default_data_format = 'initial_activity'
+
 
 class KineticModel(object):
     """quickly build a kinetic model fitting """
@@ -157,7 +159,7 @@ class KineticModel(object):
 
         # add selection for data conversion
         data_conversion_slider = ipywidgets.RadioButtons(options=self.data_conversion_dict.keys(),
-                                                         value='initial_activity',
+                                                         value=default_data_format,
                                                          description='format')
         sliders.append(data_conversion_slider)
         slider_names += ['format']
@@ -221,7 +223,7 @@ class KineticModel(object):
             time = args[1]
         return pd.DataFrame(concentrations, columns=self.species, index=time)
 
-    def show_exp_data(self, compare_model=True, legend=False, data_conversion='initial_activity'):
+    def show_exp_data(self, compare_model=True, legend=False, data_conversion=default_data_format):
         selected_conversion = self.data_conversion_dict[data_conversion]
         data_conversion_func = selected_conversion['func']
 
@@ -300,20 +302,20 @@ class KineticModel(object):
         for plot_style in ['log10', 'invert']:
             self.show_exp_data(compare_model=compare_model, data_conversion=plot_style)
 
-    def ydata_exp(self, data_conversion='initial_activity'):
+    def ydata_exp(self, data_conversion=default_data_format):
         """return a flattened array of the available experimental data. This is helpful for parameter fitting"""
         return self.format_ydata(self.exp_data, data_conversion=data_conversion)
 
-    def ydata_model(self, data_conversion='initial_activity'):
+    def ydata_model(self, data_conversion=default_data_format):
         """return a flattened array of the modeled data corresponding to available experimental data."""
         return self.format_ydata(self.modeled_data, data_conversion=data_conversion)
 
-    def ydata_model_new_parameters(self, new_parameters, data_conversion='initial_activity'):
+    def ydata_model_new_parameters(self, new_parameters, data_conversion=default_data_format):
         new_modeled_data = self.model_exp_data(new_parameters=new_parameters, return_only=True)
 
         return self.format_ydata(new_modeled_data, data_conversion=data_conversion)
 
-    def format_ydata(self, data_array, data_conversion='initial_activity'):
+    def format_ydata(self, data_array, data_conversion=default_data_format):
         """format an array so that it can be accepted as ydata by scipy.optimize.curve_fit
         1d, no values that are np.nan
         By default, it will return data as % of initial activity, it can use all data_conversions, though!"""
