@@ -145,7 +145,7 @@ class KineticModel(object):
         """interactively create a reaction system and compare modeled results to experimental data"""
         self.reaction_rates.update(pd.Series(kwargs))
         self.setup_and_run_model()
-        self.show_exp_data()
+        self.show_exp_data(data_conversion=kwargs['format'])
 
     def create_rate_sliders(self):
         slider_names = self.get_reaction_constant_names()
@@ -154,6 +154,13 @@ class KineticModel(object):
         if 'binding_sites' in self.reaction_rates:
             slider_names.append('binding_sites')
         sliders = [create_rate_slider(key, self.reaction_rates) for key in slider_names]
+
+        # add selection for data conversion
+        data_conversion_slider = ipywidgets.RadioButtons(options=self.data_conversion_dict.keys(),
+                                                         value='initial_activity',
+                                                         description='format')
+        sliders.append(data_conversion_slider)
+        slider_names += ['format']
 
         return pd.Series(sliders, index=slider_names)
 
