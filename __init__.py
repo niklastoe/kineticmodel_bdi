@@ -56,7 +56,7 @@ class KineticModel(object):
 
         # absolute
         def absolute(x):
-            return x / 100 * self.exp_data.columns
+            return np.multiply(x / 100, self.exp_data.columns.values)
         options['absolute'] = {'func': absolute,
                                'ylabel': '[T] / M',
                               'ylim': (0, max(self.exp_data.columns)*1.05)}
