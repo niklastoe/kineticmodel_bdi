@@ -28,6 +28,7 @@ class KineticModel(object):
         self.products = self.identify_products()
 
         self.setup_and_run_model()
+        self.data_conversion_dict = self.data_conversion_options()
 
     def setup_and_run_model(self):
         self.set_binding_sites()
@@ -35,6 +36,36 @@ class KineticModel(object):
         self.model = self.create_reaction_system()
         self.odesys, extra = get_odesys(self.model, include_params=False)
         self.model_exp_data()
+
+    def data_conversion_options(self):
+        options = {}
+
+        # initial_activity
+        def regular(x):
+            return x
+        options['initial_activity'] = {'func': regular,
+                                       'ylabel': '% initial activity',
+                                       'ylim': (-5, 105)}
+
+        # invert
+        def invert(x):
+            return 100. / x
+
+        options['invert'] = {'func': invert,
+                                     'ylabel': '1 / rel. activity'}
+
+        # absolute
+        def absolute(x):
+            return x / 100 * self.exp_data.columns
+        options['absolute'] = {'func': absolute,
+                               'ylabel': '[T] / M',
+                              'ylim': (0, max(self.exp_data.columns)*1.05)}
+
+        # log10
+        options['log10'] = {'func': np.log10,
+                            'ylabel': r'$\log_{10}$ activity / %'}
+
+        return options
 
     def set_binding_sites(self):
         """keep self.binding_sites updated"""
@@ -183,18 +214,25 @@ class KineticModel(object):
             time = args[1]
         return pd.DataFrame(concentrations, columns=self.species, index=time)
 
-    def show_exp_data(self, compare_model=True, legend=False):
+    def show_exp_data(self, compare_model=True, legend=False, data_conversion='initial_activity'):
+        selected_conversion = self.data_conversion_dict[data_conversion]
+        data_conversion_func = selected_conversion['func']
+
+        exp_data = data_conversion_func(self.exp_data)
+        modeled_data = data_conversion_func(self.modeled_data)
+
         if compare_model:
-            ax = self.exp_data.plot(style='o', legend=False)
+            ax = exp_data.plot(style='o', legend=False)
             # ensure same styles (esp. colors) are used for experimental and modeled data
             ax.set_prop_cycle(None)
-            plot_df_w_nan(self.modeled_data, style="--x", axes=ax)
+            plot_df_w_nan(modeled_data, style="--x", axes=ax)
 
         else:
-            plot_df_w_nan(self.exp_data, style="-o")
+            plot_df_w_nan(exp_data, style="-o")
 
-        plt.ylabel('% initial activity')
-        plt.ylim(-5, 105)
+        plt.ylabel(selected_conversion['ylabel'])
+        if 'ylim' in selected_conversion:
+            plt.ylim(*selected_conversion['ylim'])
         if legend:
             plt.legend(self.exp_data.columns)
 
@@ -250,24 +288,8 @@ class KineticModel(object):
             self.modeled_data = modeled_data
 
     def reaction_order_plots(self, compare_model=True):
-        fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(10, 5), sharex=True)
-
-        axes[0].set_yscale('log')
-        axes[0].set_ylabel(r'$\log_{10}$ [activity]')
-
-        axes[1].set_ylabel('1/ rel. activity')
-
-        if compare_model:
-            plot_df_w_nan(self.exp_data / 100, style='o', axes=axes[0])
-            axes[0].set_prop_cycle(None)
-            plot_df_w_nan(self.modeled_data / 100, style='--x', axes=axes[0])
-
-            plot_df_w_nan(100 / self.exp_data, style='o', axes=axes[1])
-            axes[1].set_prop_cycle(None)
-            plot_df_w_nan(100 / self.modeled_data, style='--x', axes=axes[1])
-        else:
-            plot_df_w_nan(self.exp_data / 100, style='-o', axes=axes[0])
-            plot_df_w_nan(100 / self.exp_data, style='-o', axes=axes[1])
+        for plot_style in ['log10', 'invert']:
+            self.show_exp_data(compare_model=compare_model, data_conversion=plot_style)
 
     def ydata_exp(self, percentage=True):
         """return a flattened array of the available experimental data. This is helpful for parameter fitting"""
