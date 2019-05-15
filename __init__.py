@@ -295,6 +295,8 @@ class KineticModel(object):
             self.modeled_data = modeled_data
 
     def reaction_order_plots(self, compare_model=True):
+        """log10 plot of initial activity should be linear for first-order reaction,
+        inverted initial activity should be linear for second-order reaction"""
         for plot_style in ['log10', 'invert']:
             self.show_exp_data(compare_model=compare_model, data_conversion=plot_style)
 
