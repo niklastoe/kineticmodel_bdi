@@ -298,40 +298,30 @@ class KineticModel(object):
         for plot_style in ['log10', 'invert']:
             self.show_exp_data(compare_model=compare_model, data_conversion=plot_style)
 
-    def ydata_exp(self, percentage=True):
+    def ydata_exp(self, data_conversion='initial_activity'):
         """return a flattened array of the available experimental data. This is helpful for parameter fitting"""
-        if percentage:
-            return self.format_ydata(self.exp_data)
-        else:
-            return self.format_ydata(self.exp_data, self.exp_data.columns)
+        return self.format_ydata(self.exp_data, data_conversion=data_conversion)
 
-    def ydata_model(self, percentage=True):
+    def ydata_model(self, data_conversion='initial_activity'):
         """return a flattened array of the modeled data corresponding to available experimental data."""
-        if percentage:
-            return self.format_ydata(self.modeled_data)
-        else:
-            return self.format_ydata(self.modeled_data, self.exp_data.columns)
+        return self.format_ydata(self.modeled_data, data_conversion=data_conversion)
 
-    def ydata_model_new_parameters(self, new_parameters, percentage=True):
+    def ydata_model_new_parameters(self, new_parameters, data_conversion='initial_activity'):
         new_modeled_data = self.model_exp_data(new_parameters=new_parameters, return_only=True)
-        if percentage:
-            return self.format_ydata(new_modeled_data)
-        else:
-            return self.format_ydata(new_modeled_data, self.exp_data.columns)
 
-    @staticmethod
-    def format_ydata(data_array, concentration=None):
+        return self.format_ydata(new_modeled_data, data_conversion=data_conversion)
+
+    def format_ydata(self, data_array, data_conversion='initial_activity'):
         """format an array so that it can be accepted as ydata by scipy.optimize.curve_fit
         1d, no values that are np.nan
-        By default, it will return data as % of initial activity, it can also convert to concentration (if given)"""
+        By default, it will return data as % of initial activity, it can use all data_conversions, though!"""
         if type(data_array) == pd.core.frame.DataFrame:
             organized_array = data_array.values
         else:
             organized_array = data_array
 
-        # transform from percentage to concentration
-        if concentration is not None:
-            organized_array = (np.array(concentration).reshape(3, 1) * organized_array.T / 100).T
+        # transform data if desired
+        organized_array = self.data_conversion_dict[data_conversion]['func'](organized_array)
 
         flattened_array = organized_array.flatten()
 
