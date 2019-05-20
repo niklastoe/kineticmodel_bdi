@@ -67,6 +67,12 @@ class KineticModel(object):
         options['log10'] = {'func': np.log10,
                             'ylabel': r'$\log_{10}$ activity / %'}
 
+        # log10 absolute
+        def log10_absolute(x):
+            return np.log10(absolute(x))
+        options['log10_absolute'] = {'func': log10_absolute,
+                                     'ylabel': r'$\log_{10}$ [T] / M'}
+
         return options
 
     def set_binding_sites(self):
