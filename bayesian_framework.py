@@ -8,12 +8,6 @@ def calc_probability_absolute_std(exp_value, modeled_value, abs_std=3.3):
     return mlab.normpdf(modeled_value, curr_mean, abs_std)
 
 
-def calc_probability_relative_std(exp_value, modeled_value, rel_std=0.2):
-    curr_mean = exp_value
-    curr_std = curr_mean * rel_std
-    return mlab.normpdf(modeled_value, curr_mean, curr_std)
-
-
 def likelihood(parameters,
                model,
                calc_probability_func=calc_probability_absolute_std,
