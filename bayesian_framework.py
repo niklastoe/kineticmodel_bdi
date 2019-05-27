@@ -1,41 +1,57 @@
 import matplotlib.mlab as mlab
+from scipy.stats import laplace
 from sampyl import np
 from workflows.kinetic_modeling import default_data_format
 
+gaussian_pdf = mlab.normpdf
+laplace_pdf = laplace.pdf
 
-def calc_probability_absolute_std(exp_value, modeled_value, abs_std=3.3):
-    curr_mean = exp_value
-    return mlab.normpdf(modeled_value, curr_mean, abs_std)
+class Likelihood(object):
 
-
-def likelihood(parameters,
-               model,
-               calc_probability_func=calc_probability_absolute_std,
-               data_conversion=default_data_format,
-               std_deviation=3.3,
-               max_likelihood=False):
-    """calculate how well the model fits the data.
-    If max_likelihood=True, it will return the theoretical maximum, i.e. if all data points were reproduced exactly."""
-    try:
-        exp_data = model.ydata_exp(data_conversion=data_conversion)
-
-        # if desired, one can calculalte the maximum likelihood possible,
-        # e.g. where all datapoints are perfectly modeled
-        if max_likelihood:
-            model_data = exp_data
+    def __init__(self,
+                 model,
+                 data_conversion=default_data_format,
+                 norm='gaussian',
+                 std_deviation=3.3):
+        self.model = model
+        self.data_conversion = data_conversion
+        self.std_deviation = std_deviation
+        if norm == 'gaussian':
+            self.norm = gaussian_pdf
+        elif norm == 'laplace':
+            self.norm = laplace_pdf
         else:
-            model_data = model.ydata_model_new_parameters(new_parameters=parameters,
-                                                          data_conversion=data_conversion)
+            raise ValueError('Unknown norm!!')
+        self.max_likelihood = self.calc_likelihood('placeholder', max_likelihood=True)
+        print('Highest theoretically possible likelihood: %f' % self.max_likelihood)
 
-        individual_likelihoods = []
-        for idx, model_datapoint in enumerate(model_data):
-            exp_datapoint = exp_data[idx]
-            probability = calc_probability_func(exp_datapoint, model_datapoint, std_deviation)
+    def calc_likelihood(self, parameters, max_likelihood=False):
+        """calculate how well the model fits the data.
+        If max_likelihood=True, it will return the theoretical maximum, i.e. if all data points were reproduced exactly."""
+        try:
+            exp_data = self.model.ydata_exp(data_conversion=self.data_conversion)
 
-            individual_likelihoods.append(probability)
+            # if desired, one can calculalte the maximum likelihood possible,
+            # e.g. where all datapoints are perfectly modeled
+            if max_likelihood:
+                model_data = exp_data
+            else:
+                self.model.starting_concentration['poly'] = 10 ** parameters['S0']
+                model_data = self.model.ydata_model_new_parameters(new_parameters=parameters,
+                                                                   data_conversion=self.data_conversion)
 
-        log_likelihood = np.log(individual_likelihoods).sum()
-    except RuntimeError:
-        log_likelihood = -np.inf
+            individual_likelihoods = []
+            for idx, model_datapoint in enumerate(model_data):
+                exp_datapoint = exp_data[idx]
+                probability = self.calc_probability_absolute_std(exp_datapoint, model_datapoint)
+                individual_likelihoods.append(probability)
 
-    return log_likelihood
+            log_likelihood = np.log(individual_likelihoods).sum()
+        except RuntimeError:
+            log_likelihood = -np.inf
+
+        return log_likelihood
+
+    def calc_probability_absolute_std(self, exp_value, modeled_value):
+        return self.norm(modeled_value, exp_value, self.std_deviation)
+
