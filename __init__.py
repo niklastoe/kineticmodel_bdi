@@ -273,12 +273,14 @@ class KineticModel(object):
 
             if observable == 'educt':
                 # check remaining concentration of educts
-                observed_activity = concentrations[self.educts].sum(axis=1)
+                observed_activity = self.get_species_concentration(concentrations, self.educts)
             elif observable == 'product':
                 # check how much product has been created and subtract it from starting concentration of educt
-                product_indeces = [self.species.index(x) for x in self.products]
-                observed_activity = concentrations[:, product_indeces].sum(axis=1)
+                observed_activity = self.get_species_concentration(concentrations, self.products)
                 observed_activity = educts_starting_conc - observed_activity
+            elif observable in self.species:
+                """check concentration of any species of interest"""
+                observed_activity = self.get_species_concentration(concentrations, [observable])
             else:
                 raise ValueError('Unknown observable!')
             modeled_data.append(observed_activity / educts_starting_conc)
@@ -301,6 +303,11 @@ class KineticModel(object):
             return modeled_data
         else:
             self.modeled_data = modeled_data
+
+    def get_species_concentration(self, concentrations, observables):
+        species_indeces = [self.species.index(x) for x in observables]
+        observed_activity = concentrations[:, species_indeces].sum(axis=1)
+        return observed_activity
 
     def reaction_order_plots(self, compare_model=True):
         """log10 plot of initial activity should be linear for first-order reaction,
