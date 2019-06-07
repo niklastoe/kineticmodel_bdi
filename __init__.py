@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 from scipy.optimize import curve_fit
 
-default_data_format = 'initial_activity'
+default_data_format = 'absolute'
 
 
 class KineticModel(object):
@@ -45,28 +45,29 @@ class KineticModel(object):
         options = {}
 
         # initial_activity
-        def regular(x):
-            return x
-        options['initial_activity'] = {'func': regular,
+        def initial_activity(x):
+            return np.divide(x * 100, self.exp_data.columns.values)
+        options['initial_activity'] = {'func': initial_activity,
                                        'ylabel': '% initial activity',
                                        'ylim': (-5, 105)}
 
         # invert
         def invert(x):
-            return 100. / x
+            return 100. / initial_activity(x)
 
         options['invert'] = {'func': invert,
                              'ylabel': '1 / rel. activity'}
 
         # absolute
         def absolute(x):
-            return np.multiply(x / 100, self.exp_data.columns.values)
+            return x
         options['absolute'] = {'func': absolute,
-                               'ylabel': '[T] / M',
-                               'ylim': (0, max(self.exp_data.columns)*1.05)}
+                               'ylabel': '[T] / M'}
 
         # log10
-        options['log10'] = {'func': np.log10,
+        def log10_initial_activity(x):
+            return np.log10(initial_activity(x))
+        options['log10'] = {'func': log10_initial_activity,
                             'ylabel': r'$\log_{10}$ activity / %'}
 
         # log10 absolute
@@ -273,12 +274,9 @@ class KineticModel(object):
                 observed_activity = self.get_species_concentration(concentrations, [observable])
             else:
                 raise ValueError('Unknown observable!')
-            modeled_data.append(observed_activity / educts_starting_conc)
+            modeled_data.append(observed_activity)
 
         modeled_data = np.array(modeled_data).T
-
-        # convert it to % of starting concentration
-        modeled_data *= 100
 
         if only_exp_data:
             modeled_data[np.where(np.isnan(self.exp_data))] = np.nan
