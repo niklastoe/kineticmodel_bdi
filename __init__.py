@@ -272,6 +272,9 @@ class KineticModel(object):
             elif observable in self.species:
                 """check concentration of any species of interest"""
                 observed_activity = self.get_species_concentration(concentrations, [observable])
+            elif type(observable) == list:
+                """check concentration of any species of interest"""
+                observed_activity = self.get_species_concentration(concentrations, observable)
             else:
                 raise ValueError('Unknown observable!')
             modeled_data.append(observed_activity)
