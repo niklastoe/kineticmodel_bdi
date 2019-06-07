@@ -18,6 +18,7 @@ class KineticModel(object):
 
     def __init__(self, exp_data, reaction_list_input, reaction_rates=None):
         self.exp_data = exp_data
+        self.starting_concentration = exp_data.starting_concentration
         self.studied_concentration = exp_data.columns.name
 
         self.reaction_list_input = reaction_list_input
@@ -34,7 +35,6 @@ class KineticModel(object):
 
     def setup_and_run_model(self):
         self.set_binding_sites()
-        self.get_starting_concentration()
         self.model = self.create_reaction_system()
         self.odesys, extra = get_odesys(self.model, include_params=False)
         self.model_exp_data()
@@ -107,20 +107,6 @@ class KineticModel(object):
                     product_species.append(name)
 
         return product_species
-
-    def get_starting_concentration(self):
-        """deduce starting concentrations from the name of the DF
-        if that does not work, there are no starting concentrations"""
-        try:
-            species_name = self.exp_data.name[0]
-            species_concentration = self.exp_data.name[1]
-            if 'poly' in species_name:
-                species_concentration *= self.binding_sites
-            starting_concentration = {species_name: species_concentration}
-        except:
-            starting_concentration = {}
-
-        self.starting_concentration = starting_concentration
 
     def identify_species(self):
         species = []
