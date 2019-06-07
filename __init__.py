@@ -16,10 +16,12 @@ default_data_format = 'initial_activity'
 class KineticModel(object):
     """quickly build a kinetic model fitting """
 
-    def __init__(self, exp_data, reaction_list_input, reaction_rates=None):
+    def __init__(self, exp_data, reaction_list_input,
+                 reaction_rates=None, observed_species='product'):
         self.exp_data = exp_data
         self.starting_concentration = exp_data.starting_concentration
         self.studied_concentration = exp_data.columns.name
+        self.observed_species = observed_species
 
         self.reaction_list_input = reaction_list_input
 
@@ -238,14 +240,16 @@ class KineticModel(object):
             plt.legend(self.exp_data.columns)
 
     def model_exp_data(self,
-                       observable='product',
+                       observable='default',
                        only_exp_data=True,
                        return_only=False,
                        new_parameters=None):
         """model the experimental data and return a pd.DataFrame which matches the format of the experimental one.
         If new parameters are given, this will use the native (C++) odesys and avoid pandas for speed up!"""
-        curr_starting_conc = copy.deepcopy(self.starting_concentration)
+        if observable == 'default':
+            observable = self.observed_species
 
+        curr_starting_conc = copy.deepcopy(self.starting_concentration)
         modeled_data = []
 
         for conc_idx, conc in enumerate(self.exp_data.columns):
