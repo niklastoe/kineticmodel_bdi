@@ -52,7 +52,7 @@ class Likelihood(object):
         return log_likelihood
 
     def check_model(self):
-        if type(self.model) == KineticModel:
+        if isinstance(self.model, KineticModel):
             return 'kinetic'
         elif type(self.model) == types.FunctionType:
             return 'function'
