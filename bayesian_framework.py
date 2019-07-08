@@ -20,7 +20,6 @@ class Likelihood(object):
         self.data_conversion = data_conversion
 
         self.model_type = self.check_model()
-
         if self.model_type == 'kinetic':
             self.exp_data = self.generate_experimental_data()
         else:
@@ -68,7 +67,11 @@ class Likelihood(object):
             # catch possible RuntimeErrors: set value to infinity,
             # this will give likelihood of zero, log likelihood of -infinity
             try:
-                self.model.starting_concentration['poly'] = 10 ** parameters['S0']
+                # update 'S0' if necessary
+                if 'S0' in parameters:
+                    self.model.starting_concentration['poly'] = 10 ** parameters['S0']
+                else:
+                    pass
                 model_data = self.model.ydata_model_new_parameters(new_parameters=parameters,
                                                                    data_conversion=self.data_conversion)
             except RuntimeError:
