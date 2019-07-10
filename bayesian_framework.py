@@ -53,7 +53,7 @@ class Likelihood(object):
     def check_model(self):
         if isinstance(self.model, KineticModel):
             return 'kinetic'
-        elif type(self.model) == types.FunctionType:
+        elif isinstance(self.model, types.FunctionType):
             return 'function'
         else:
             raise ValueError('Model not understood!!')
