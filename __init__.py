@@ -49,20 +49,20 @@ class KineticModel(object):
 
         curr_starting_concentration = copy.deepcopy(self.starting_concentration)
 
-        def variable_starting_concentrations():
-            variable_species = []
-            for x in self.reaction_rates.index:
-                if x[-1] == '0':
-                    variable_species.append(x)
-            return variable_species
-
-        variable_species = variable_starting_concentrations()
+        variable_species = self.variable_starting_concentrations()
 
         for x in variable_species:
             species_name = x[:-1]
             curr_starting_concentration[species_name] = 10**parameters[x]
 
         return curr_starting_concentration
+
+    def variable_starting_concentrations(self):
+        variable_species = []
+        for x in self.parameters.index:
+            if x[-1] == '0':
+                variable_species.append(x)
+        return variable_species
 
     def setup_model(self):
         self.starting_concentration = self.update_starting_concentration()
@@ -146,12 +146,17 @@ class KineticModel(object):
         unique_species.sort()
         return unique_species
 
-    def get_reaction_constant_names(self):
-        """return list of reaction constant names, sorted in the same way as in self.reaction_rates
-        this is necessary because self.reaction_rates can contain items which do not correspond to reaction rates"""
-        reaction_constant_names = [x[-1] for x in self.reaction_list_input]
-        sorted_reaction_constant_names = [x for x in self.reaction_rates.index if x in reaction_constant_names]
-        return sorted_reaction_constant_names
+    def get_slider_names(self):
+        """return list of slider names, sorted in the same way as in self.parameters
+        this is necessary because self.parameters can contain items which won't be sliders"""
+        slider_names = [x[-1] for x in self.reaction_list_input]
+
+        # create sliders for variable starting conditions
+        for species_parameter in self.variable_starting_concentrations():
+            slider_names.append(species_parameter)
+
+        sorted_slider_names = [x for x in self.parameters.index if x in slider_names]
+        return sorted_slider_names
 
     def create_reaction_system(self):
         """create the reaction system for chempy"""
@@ -168,11 +173,8 @@ class KineticModel(object):
         self.show_exp_data(data_conversion=kwargs['format'])
 
     def create_rate_sliders(self):
-        slider_names = self.get_reaction_constant_names()
+        slider_names = self.get_slider_names()
 
-        # only create a slider if S0 was specified in input
-        if 'S0' in self.reaction_rates:
-            slider_names.append('S0')
         sliders = [create_rate_slider(key, self.parameters) for key in slider_names]
 
         # add selection for data conversion
