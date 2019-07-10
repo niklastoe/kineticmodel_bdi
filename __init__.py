@@ -42,39 +42,39 @@ class KineticModel(object):
         self.model_exp_data()
 
     def data_conversion_options(self):
+        """return a dictionary of options how to convert/present the kinetic data"""
         options = {}
 
-        # initial_activity
+        # absolute concentration (this is the default/data must be read in as absolute concentrations)
+        def absolute(x):
+            return x
+        options['absolute'] = {'func': absolute,
+                               'ylabel': '[T] / M'}
+
+        # log10 of absolute concentration
+        def log10_absolute(x):
+            return np.log10(absolute(x))
+        options['log10_absolute'] = {'func': log10_absolute,
+                                     'ylabel': r'$\log_{10}$ [T] / M'}
+
+        # initial_activity (remaining percentage of initial activity, dropping from 100 to 0%)
         def initial_activity(x):
             return np.divide(x * 100, self.exp_data.columns.values)
         options['initial_activity'] = {'func': initial_activity,
                                        'ylabel': '% initial activity',
                                        'ylim': (-5, 105)}
 
-        # invert
-        def invert(x):
-            return 100. / initial_activity(x)
-
-        options['invert'] = {'func': invert,
-                             'ylabel': '1 / rel. activity'}
-
-        # absolute
-        def absolute(x):
-            return x
-        options['absolute'] = {'func': absolute,
-                               'ylabel': '[T] / M'}
-
-        # log10
+        # log10 of initial activity
         def log10_initial_activity(x):
             return np.log10(initial_activity(x))
         options['log10'] = {'func': log10_initial_activity,
                             'ylabel': r'$\log_{10}$ activity / %'}
 
-        # log10 absolute
-        def log10_absolute(x):
-            return np.log10(absolute(x))
-        options['log10_absolute'] = {'func': log10_absolute,
-                                     'ylabel': r'$\log_{10}$ [T] / M'}
+        # invert of initial activity (if linear this is indicative of a second-order reaction)
+        def invert(x):
+            return 100. / initial_activity(x)
+        options['invert'] = {'func': invert,
+                             'ylabel': '1 / rel. activity'}
 
         return options
 
