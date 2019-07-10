@@ -17,7 +17,7 @@ class KineticModel(object):
     """quickly build a kinetic model fitting """
 
     def __init__(self, exp_data, reaction_list_input,
-                 reaction_rates=None, observed_species='product'):
+                 parameters=None, observed_species='product'):
         self.exp_data = exp_data
         # check if there is information on the starting concentrations, otherwise use empty dictionary
         try:
@@ -31,7 +31,7 @@ class KineticModel(object):
 
         self.species = self.identify_species()
         # avoid that input reaction rates are altered, e.g. by self.interactive_plot
-        self.reaction_rates = copy.deepcopy(reaction_rates)
+        self.parameters = copy.deepcopy(parameters)
 
         self.educts = self.identify_educts()
         self.products = self.identify_products()
@@ -45,7 +45,7 @@ class KineticModel(object):
         """update a starting concentration specified as a parameter"""
 
         if parameters is None:
-            parameters = self.reaction_rates
+            parameters = self.parameters
 
         curr_starting_concentration = copy.deepcopy(self.starting_concentration)
 
@@ -162,7 +162,7 @@ class KineticModel(object):
 
     def interactive_rsys(self, **kwargs):
         """interactively create a reaction system and compare modeled results to experimental data"""
-        self.reaction_rates.update(pd.Series(kwargs))
+        self.parameters.update(pd.Series(kwargs))
         self.setup_model()
         self.model_exp_data()
         self.show_exp_data(data_conversion=kwargs['format'])
@@ -173,7 +173,7 @@ class KineticModel(object):
         # only create a slider if S0 was specified in input
         if 'S0' in self.reaction_rates:
             slider_names.append('S0')
-        sliders = [create_rate_slider(key, self.reaction_rates) for key in slider_names]
+        sliders = [create_rate_slider(key, self.parameters) for key in slider_names]
 
         # add selection for data conversion
         data_conversion_slider = ipywidgets.RadioButtons(options=self.data_conversion_dict.keys(),
@@ -215,7 +215,7 @@ class KineticModel(object):
                 raise ValueError('New parameters must either be pd.Series or dictionary!!')
 
         if new_parameters is None:
-            result = self.odesys.integrate(integration_times, c0, convert_parameters(self.reaction_rates),
+            result = self.odesys.integrate(integration_times, c0, convert_parameters(self.parameters),
                                            atol=1e-12, rtol=1e-14)
         else:
             # native odesys requires that all species have a starting concentration
