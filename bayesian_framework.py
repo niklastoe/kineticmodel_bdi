@@ -35,12 +35,15 @@ class Likelihood(object):
             self.norm = laplace_pdf
         else:
             raise ValueError('Unknown norm!!')
+        
+        # this needs a 'placeholder' because no parameters are necessary to calculate the theoretical maximum
         self.max_likelihood = self.calc_likelihood('placeholder', max_likelihood=True)
         print('Highest theoretically possible likelihood: %f' % self.max_likelihood)
 
     def calc_likelihood(self, parameters, max_likelihood=False):
         """calculate how well the model fits the data.
-        If max_likelihood=True, it will return the theoretical maximum, i.e. if all data points were reproduced exactly."""
+        If max_likelihood=True, it will return the theoretical maximum,
+        i.e. if a perfect model reproduced all data points exactly."""
         if max_likelihood:
             model_data = self.exp_data
         else:
@@ -57,7 +60,6 @@ class Likelihood(object):
             return 'function'
         else:
             raise ValueError('Model not understood!!')
-
 
     def generate_experimental_data(self):
         return self.model.ydata_exp(data_conversion=self.data_conversion)
