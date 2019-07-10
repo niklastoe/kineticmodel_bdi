@@ -35,8 +35,25 @@ class KineticModel(object):
         self.setup_and_run_model()
         self.data_conversion_dict = self.data_conversion_options()
 
+    def update_starting_concentration(self, parameters=None):
+        """update a starting concentration specified as a parameter"""
+
+        if parameters is None:
+            parameters = self.reaction_rates
+
+        curr_starting_concentration = copy.deepcopy(self.starting_concentration)
+
+        # variable_starting_concentrations = []
+        # for x in parameters.index:
+        #     if x[-1] == '0':
+        #         variable_starting_concentrations.append(x)
+
+        if 'S0' in parameters:
+            curr_starting_concentration['poly'] = 10**parameters['S0']
+        return curr_starting_concentration
+
     def setup_and_run_model(self):
-        self.set_binding_sites()
+        self.starting_concentration = self.update_starting_concentration()
         self.model = self.create_reaction_system()
         self.odesys, extra = get_odesys(self.model, include_params=False)
         self.model_exp_data()
@@ -77,13 +94,6 @@ class KineticModel(object):
                              'ylabel': '1 / rel. activity'}
 
         return options
-
-    def set_binding_sites(self):
-        """keep self.binding_sites updated"""
-        if 'binding_sites' in self.reaction_rates:
-            self.binding_sites = self.reaction_rates['binding_sites']
-        else:
-            self.binding_sites = 1.0
 
     def identify_educts(self):
         """find all species which are considered educts. This is based on my trypsin models"""
@@ -147,9 +157,9 @@ class KineticModel(object):
     def create_rate_sliders(self):
         slider_names = self.get_reaction_constant_names()
 
-        # only create a slider if binding_sites was specified in input
-        if 'binding_sites' in self.reaction_rates:
-            slider_names.append('binding_sites')
+        # only create a slider if S0 was specified in input
+        if 'S0' in self.reaction_rates:
+            slider_names.append('S0')
         sliders = [create_rate_slider(key, self.reaction_rates) for key in slider_names]
 
         # add selection for data conversion
@@ -250,13 +260,15 @@ class KineticModel(object):
         if observable == 'default':
             observable = self.observed_species
 
-        curr_starting_conc = copy.deepcopy(self.starting_concentration)
+        # get starting concentrations and update them if needed
+        if new_parameters is None:
+            curr_starting_conc = copy.deepcopy(self.starting_concentration)
+        else:
+            curr_starting_conc = self.update_starting_concentration(new_parameters)
         modeled_data = []
 
         for conc_idx, conc in enumerate(self.exp_data.columns):
             curr_starting_conc[self.studied_concentration] = conc
-            if 'poly' in self.studied_concentration:
-                curr_starting_conc[self.studied_concentration] *= self.binding_sites
             concentrations = self.evaluate_system(curr_starting_conc,
                                                   self.exp_data.index,
                                                   new_parameters=new_parameters)

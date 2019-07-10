@@ -69,11 +69,6 @@ class Likelihood(object):
             # catch possible RuntimeErrors: set value to infinity,
             # this will give likelihood of zero, log likelihood of -infinity
             try:
-                # update 'S0' if necessary
-                if 'S0' in parameters:
-                    self.model.starting_concentration['poly'] = 10 ** parameters['S0']
-                else:
-                    pass
                 model_data = self.model.ydata_model_new_parameters(new_parameters=parameters,
                                                                    data_conversion=self.data_conversion)
             except RuntimeError:
