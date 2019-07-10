@@ -32,8 +32,10 @@ class KineticModel(object):
         self.educts = self.identify_educts()
         self.products = self.identify_products()
 
-        self.setup_and_run_model()
         self.data_conversion_dict = self.data_conversion_options()
+
+        self.setup_model()
+        self.model_exp_data()
 
     def update_starting_concentration(self, parameters=None):
         """update a starting concentration specified as a parameter"""
@@ -58,11 +60,11 @@ class KineticModel(object):
 
         return curr_starting_concentration
 
-    def setup_and_run_model(self):
+    def setup_model(self):
         self.starting_concentration = self.update_starting_concentration()
         self.model = self.create_reaction_system()
+        # create system of ordinary differential equations
         self.odesys, extra = get_odesys(self.model, include_params=False)
-        self.model_exp_data()
 
     def data_conversion_options(self):
         """return a dictionary of options how to convert/present the kinetic data"""
@@ -157,7 +159,8 @@ class KineticModel(object):
     def interactive_rsys(self, **kwargs):
         """interactively create a reaction system and compare modeled results to experimental data"""
         self.reaction_rates.update(pd.Series(kwargs))
-        self.setup_and_run_model()
+        self.setup_model()
+        self.model_exp_data()
         self.show_exp_data(data_conversion=kwargs['format'])
 
     def create_rate_sliders(self):
