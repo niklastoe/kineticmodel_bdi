@@ -35,6 +35,7 @@ class KineticModel(object):
 
         self.educts = self.identify_educts()
         self.products = self.identify_products()
+        self.species_w_variable_starting_concentration = self.variable_starting_concentrations()
 
         self.data_conversion_dict = self.data_conversion_options()
 
@@ -49,9 +50,7 @@ class KineticModel(object):
 
         curr_starting_concentration = copy.deepcopy(self.starting_concentration)
 
-        variable_species = self.variable_starting_concentrations()
-
-        for x in variable_species:
+        for x in self.species_w_variable_starting_concentration:
             species_name = x[:-1]
             curr_starting_concentration[species_name] = 10**parameters[x]
 
@@ -152,7 +151,7 @@ class KineticModel(object):
         slider_names = [x[-1] for x in self.reaction_list_input]
 
         # create sliders for variable starting conditions
-        for species_parameter in self.variable_starting_concentrations():
+        for species_parameter in self.species_w_variable_starting_concentration:
             slider_names.append(species_parameter)
 
         sorted_slider_names = [x for x in self.parameters.index if x in slider_names]
