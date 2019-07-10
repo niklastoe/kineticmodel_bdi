@@ -43,13 +43,19 @@ class KineticModel(object):
 
         curr_starting_concentration = copy.deepcopy(self.starting_concentration)
 
-        # variable_starting_concentrations = []
-        # for x in parameters.index:
-        #     if x[-1] == '0':
-        #         variable_starting_concentrations.append(x)
+        def variable_starting_concentrations():
+            variable_species = []
+            for x in self.reaction_rates.index:
+                if x[-1] == '0':
+                    variable_species.append(x)
+            return variable_species
 
-        if 'S0' in parameters:
-            curr_starting_concentration['poly'] = 10**parameters['S0']
+        variable_species = variable_starting_concentrations()
+
+        for x in variable_species:
+            species_name = x[:-1]
+            curr_starting_concentration[species_name] = 10**parameters[x]
+
         return curr_starting_concentration
 
     def setup_and_run_model(self):
