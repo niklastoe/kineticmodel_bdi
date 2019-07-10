@@ -82,11 +82,14 @@ class Likelihood(object):
         return model_data
 
     def log_likelihood_for_datapoints(self, model_data):
+        # generate a list of likelihoods for every single data point
         individual_likelihoods = []
         for idx, model_datapoint in enumerate(model_data):
             exp_datapoint = self.exp_data[idx]
             probability = self.calc_probability_absolute_std(exp_datapoint, model_datapoint)
             individual_likelihoods.append(probability)
+
+        # sum the logs of all likelihoods and return them
         log_likelihood = np.log(individual_likelihoods).sum()
         return log_likelihood
 
