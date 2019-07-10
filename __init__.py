@@ -19,7 +19,11 @@ class KineticModel(object):
     def __init__(self, exp_data, reaction_list_input,
                  reaction_rates=None, observed_species='product'):
         self.exp_data = exp_data
-        self.starting_concentration = exp_data.starting_concentration
+        # check if there is information on the starting concentrations, otherwise use empty dictionary
+        try:
+            self.starting_concentration = exp_data.starting_concentration
+        except:
+            self.starting_concentration = {}
         self.studied_concentration = exp_data.columns.name
         self.observed_species = observed_species
 
