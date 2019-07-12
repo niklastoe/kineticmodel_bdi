@@ -17,7 +17,7 @@ class KineticModel(object):
     """quickly build a kinetic model fitting """
 
     def __init__(self, exp_data, reaction_list_input,
-                 parameters=None, observed_species='product'):
+                 parameters=None, observed_species='product', educts=None):
         self.exp_data = exp_data
         # check if there is information on the starting concentrations, otherwise use empty dictionary
         try:
@@ -33,7 +33,10 @@ class KineticModel(object):
         # avoid that input reaction rates are altered, e.g. by self.interactive_plot
         self.parameters = copy.deepcopy(parameters)
 
-        self.educts = self.identify_educts()
+        if educts is None:
+            self.educts = self.identify_educts()
+        else:
+            self.educts = educts
         self.products = self.identify_products()
         self.species_w_variable_starting_concentration = self.variable_starting_concentrations()
 
