@@ -368,7 +368,7 @@ class KineticModel(object):
         self.native_odesys = native_sys['cvode'].from_other(self.odesys)
 
 
-def plot_df_w_nan(df, style, axes=None):
+def plot_df_w_nan(df, style, axes=None, alpha=1.):
     """iterating over columns allows to drop nan entries
     nan entries disrupt lines"""
 
@@ -376,7 +376,7 @@ def plot_df_w_nan(df, style, axes=None):
     if axes is None:
         axes = plt.axes()
     for col in df:
-        df[col].dropna().plot(style=style, ax=axes, legend=False)
+        df[col].dropna().plot(style=style, ax=axes, legend=False, alpha=alpha)
 
 
 def create_rate_slider(rate_key, rates_dict=None, slider_range=5):
