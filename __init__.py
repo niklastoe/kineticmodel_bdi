@@ -192,7 +192,7 @@ class KineticModel(object):
         rate_sliders = self.create_rate_sliders()
         ipywidgets.interact(self.interactive_rsys, **rate_sliders)
 
-    def evaluate_system(self, initial_concentrations, time, new_parameters=None):
+    def evaluate_system(self, initial_concentrations, time, new_parameters=None, return_df=False):
         """evaluate concentration of all species at given times"""
         c0 = defaultdict(float, initial_concentrations)
 
@@ -231,19 +231,11 @@ class KineticModel(object):
         # somehow, there's always an array full of zeros: get rid of it
         evaluation = np.array(result.at(time))[:, 0]
 
-        return evaluation
-
-    def evaluate_to_df(self, *args, **kwargs):
-        """evaluate_system does not use pandas to save time. This is a wrapper to format everything
-        nicely in a DataFrame if necessary"""
-        concentrations = self.evaluate_system(*args, **kwargs)
-
-        # identify time
-        if 'time' in kwargs:
-            time = kwargs['time']
+        # by default, avoid pandas to save time. If desired, it is possible to format everything nicely in a DataFrame
+        if return_df:
+            return pd.DataFrame(evaluation, columns=self.species, index=time)
         else:
-            time = args[1]
-        return pd.DataFrame(concentrations, columns=self.species, index=time)
+            return evaluation
 
     def show_exp_data(self, compare_model=True, legend=False, data_conversion=default_data_format):
         selected_conversion = self.data_conversion_dict[data_conversion]
