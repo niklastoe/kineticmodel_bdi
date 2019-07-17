@@ -60,6 +60,8 @@ class KineticModel(object):
         return curr_starting_concentration
 
     def variable_starting_concentrations(self):
+        """identify species with variable starting concentrations (i.e. those where the starting concentration is
+        controlled by a parameter of the model"""
         variable_species = []
         for x in self.parameters.index:
             if x[-1] == '0':
@@ -67,6 +69,7 @@ class KineticModel(object):
         return variable_species
 
     def setup_model(self):
+        """perform all necessary steps to setup the model and make it ready to reproduce the experimental data"""
         self.starting_concentration = self.update_starting_concentration()
         self.model = self.create_reaction_system()
         # create system of ordinary differential equations
@@ -238,6 +241,7 @@ class KineticModel(object):
             return evaluation
 
     def show_exp_data(self, compare_model=True, legend=False, data_conversion=default_data_format):
+        """show a plot of the experimental data. By default, modeled data will be shown as well"""
         selected_conversion = self.data_conversion_dict[data_conversion]
         data_conversion_func = selected_conversion['func']
 
@@ -357,6 +361,8 @@ class KineticModel(object):
         return flattened_array[~np.isnan(flattened_array)]
 
     def create_native_odesys(self):
+        """create a system of the ordinary differential equations in native C++ code.
+        It is much faster than the other one for numerous sets of parameters but requires some time for setup."""
         self.native_odesys = native_sys['cvode'].from_other(self.odesys)
 
 
