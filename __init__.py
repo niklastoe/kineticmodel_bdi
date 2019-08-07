@@ -306,6 +306,9 @@ class KineticModel(object):
             modeled_data.append(observed_activity)
 
         modeled_data = np.array(modeled_data).T
+        # with some weird settings, concentrations can be negative.
+        # set the concentration close to zero (but not exactly zero because then log becomes impossible)
+        modeled_data[np.where(modeled_data < 0)] = 1e-20
 
         if only_exp_data:
             modeled_data[np.where(np.isnan(self.exp_data.values))] = np.nan
