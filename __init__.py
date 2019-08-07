@@ -20,17 +20,14 @@ class KineticModel(object):
     def __init__(self, exp_data, reaction_list_input,
                  parameters=None, observed_species='product', educts=None):
         self.exp_data = exp_data
-        # check if there is information on the starting concentrations, otherwise use empty dictionary
-        try:
-            self.starting_concentration = exp_data.starting_concentration
-        except:
-            self.starting_concentration = {}
         self.studied_concentration = exp_data.columns.name
         self.observed_species = observed_species
 
         self.reaction_list_input = reaction_list_input
 
         self.species = self.identify_species()
+        self.set_starting_concentration(exp_data)
+
         # avoid that input reaction rates are altered, e.g. by self.interactive_plot
         self.parameters = copy.deepcopy(parameters)
 
@@ -45,6 +42,18 @@ class KineticModel(object):
 
         self.setup_model()
         self.model_exp_data()
+
+    def set_starting_concentration(self, exp_data):
+        """check if there is information on the starting concentrations, otherwise use empty dictionary"""
+        try:
+            self.starting_concentration = exp_data.starting_concentration
+        except:
+            self.starting_concentration = {}
+
+        # set all undefined starting concentrations to 0.0, native odesys requires that
+        for x in self.species:
+            if x not in self.starting_concentration:
+                self.starting_concentration[x] = 0.0
 
     def update_starting_concentration(self, parameters=None):
         """update a starting concentration specified as a parameter"""
@@ -238,10 +247,6 @@ class KineticModel(object):
             result = self.odesys.integrate(integration_times, c0, convert_parameters(self.parameters),
                                            atol=1e-12, rtol=1e-14)
         else:
-            # native odesys requires that all species have a starting concentration
-            for x in self.species:
-                if x not in c0:
-                    c0[x] = 0.0
             result = self.native_odesys.integrate(integration_times, c0, convert_parameters(new_parameters))
 
         # just get the concentrations at the input time steps; drop early_steps
