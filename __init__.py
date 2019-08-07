@@ -84,6 +84,8 @@ class KineticModel(object):
         self.model = self.create_reaction_system()
         # create system of ordinary differential equations
         self.odesys, extra = get_odesys(self.model, include_params=False)
+        self.time = self.exp_data.index
+        self.integration_times, self.org_time_index = self.expand_integration_times(self.time)
 
     def data_conversion_options(self):
         """return a dictionary of options how to convert/present the kinetic data"""
@@ -205,27 +207,25 @@ class KineticModel(object):
         rate_sliders = self.create_rate_sliders()
         ipywidgets.interact(self.interactive_rsys, **rate_sliders)
 
-    def evaluate_system(self, initial_concentrations, time, new_parameters=None, return_df=False):
+    def expand_integration_times(self, time):
+        """add early integration steps, this helps somehow with stability"""
+
+        # to avoid sorting (slow) we want to insert them at the right position
+        if time[0] == 0:
+            early_steps = time[1] * integration_time_scaling_factors
+            integration_times = np.insert(time, 1, early_steps)
+            org_time_index = np.append([0], np.arange(len(early_steps) + 1, len(time) + len(early_steps)))
+        else:
+            early_steps = time[0] * integration_time_scaling_factors
+            integration_times = np.append(early_steps, time)
+            org_time_index = np.arange(len(early_steps), len(time) + len(early_steps))
+
+        # we will need the indeces of the original times later
+        return integration_times, org_time_index
+
+    def evaluate_system(self, initial_concentrations, new_parameters=None, return_df=False):
         """evaluate concentration of all species at given times"""
         c0 = defaultdict(float, initial_concentrations)
-
-        def expand_integration_times():
-            """add early integration steps, this helps somehow with stability"""
-
-            # to avoid sorting (slow) we want to insert them at the right position
-            if time[0] == 0:
-                early_steps = time[1] * integration_time_scaling_factors
-                integration_times = np.insert(time, 1, early_steps)
-                org_time_index = np.append([0], np.arange(len(early_steps) + 1, len(time) + len(early_steps)))
-            else:
-                early_steps = time[0] * integration_time_scaling_factors
-                integration_times = np.append(early_steps, time)
-                org_time_index = np.arange(len(early_steps), len(time) + len(early_steps))
-
-            # we will need the indeces of the original times later
-            return integration_times, org_time_index
-
-        integration_times, org_time_index = expand_integration_times()
 
         def convert_parameters(input_parameters):
             """convert pd.Series to dict where all rates are 10**x
@@ -245,20 +245,20 @@ class KineticModel(object):
 
         tolerances = {'atol': 1e-12, 'rtol': 1e-14}
         if new_parameters is None:
-            result = self.odesys.integrate(integration_times, c0,
+            result = self.odesys.integrate(self.integration_times, c0,
                                            convert_parameters(self.parameters),
                                            **tolerances)
         else:
-            result = self.native_odesys.integrate(integration_times, c0,
+            result = self.native_odesys.integrate(self.integration_times, c0,
                                                   convert_parameters(new_parameters),
                                                   **tolerances)
 
         # just get the concentrations at the input time steps; drop early_steps
-        evaluation = result.yout[org_time_index]
+        evaluation = result.yout[self.org_time_index]
 
         # by default, avoid pandas to save time. If desired, it is possible to format everything nicely in a DataFrame
         if return_df:
-            return pd.DataFrame(evaluation, columns=self.species, index=time)
+            return pd.DataFrame(evaluation, columns=self.species, index=self.time)
         else:
             return evaluation
 
@@ -305,7 +305,6 @@ class KineticModel(object):
         for conc_idx, conc in enumerate(self.exp_data.columns):
             curr_starting_conc[self.studied_concentration] = conc
             concentrations = self.evaluate_system(curr_starting_conc,
-                                                  self.exp_data.index,
                                                   new_parameters=new_parameters)
 
             observed_activity = self.get_observed_activity(concentrations, curr_starting_conc, observable)
