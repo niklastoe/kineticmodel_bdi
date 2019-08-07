@@ -294,7 +294,7 @@ class KineticModel(object):
         modeled_data = np.array(modeled_data).T
 
         if only_exp_data:
-            modeled_data[np.where(np.isnan(self.exp_data))] = np.nan
+            modeled_data[np.where(np.isnan(self.exp_data.values))] = np.nan
 
         # only format as pd.DataFrame if speed is not necessary
         if new_parameters is None:
