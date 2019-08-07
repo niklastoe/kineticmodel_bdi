@@ -210,15 +210,10 @@ class KineticModel(object):
     def expand_integration_times(self, time):
         """add early integration steps, this helps somehow with stability"""
 
-        # to avoid sorting (slow) we want to insert them at the right position
-        if time[0] == 0:
-            early_steps = time[1] * integration_time_scaling_factors
-            integration_times = np.insert(time, 1, early_steps)
-            org_time_index = np.append([0], np.arange(len(early_steps) + 1, len(time) + len(early_steps)))
-        else:
-            early_steps = time[0] * integration_time_scaling_factors
-            integration_times = np.append(early_steps, time)
-            org_time_index = np.arange(len(early_steps), len(time) + len(early_steps))
+        early_steps = time[1] * integration_time_scaling_factors
+        integration_times = np.append(time, early_steps)
+        integration_times.sort()
+        org_time_index = [integration_times.tolist().index(x) for x in time]
 
         # we will need the indeces of the original times later
         return integration_times, org_time_index
