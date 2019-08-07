@@ -203,6 +203,8 @@ class KineticModel(object):
         early_steps = [time[1] / 10**i for i in np.arange(1,5)] # it should be very early indeed
         integration_times = list(time) + early_steps
         integration_times.sort()
+        # we will need the indeces of the original times later!
+        org_time_index = [integration_times.index(x) for x in time]
         integration_times = np.array(integration_times)
 
         def convert_parameters(input_parameters):
@@ -231,8 +233,8 @@ class KineticModel(object):
                     c0[x] = 0.0
             result = self.native_odesys.integrate(integration_times, c0, convert_parameters(new_parameters))
 
-        # somehow, there's always an array full of zeros: get rid of it
-        evaluation = np.array(result.at(time))[:, 0]
+        # just get the concentrations at the input time steps; drop early_steps
+        evaluation = result.yout[org_time_index]
 
         # by default, avoid pandas to save time. If desired, it is possible to format everything nicely in a DataFrame
         if return_df:
