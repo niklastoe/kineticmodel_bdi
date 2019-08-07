@@ -214,7 +214,7 @@ class KineticModel(object):
 
             input_type = type(input_parameters)
             if input_type == pd.core.series.Series:
-                return (10 ** input_parameters).to_dict()
+                return convert_parameters(input_parameters.to_dict())
             elif input_type == dict:
                 formatted_parameters = {}
                 for x in input_parameters:
