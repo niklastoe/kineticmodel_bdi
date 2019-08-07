@@ -11,6 +11,7 @@ import pandas as pd
 from scipy.optimize import curve_fit
 
 default_data_format = 'absolute'
+integration_time_scaling_factors = np.array([10 ** i for i in np.arange(-4., -0.)])
 
 
 class KineticModel(object):
@@ -200,16 +201,15 @@ class KineticModel(object):
         c0 = defaultdict(float, initial_concentrations)
 
         def expand_integration_times():
-            # add early integration steps, this helps somehow with stability
-            scaling_factors = np.array([10 ** i for i in np.arange(-4., -0.)])
+            """add early integration steps, this helps somehow with stability"""
 
             # to avoid sorting (slow) we want to insert them at the right position
             if time[0] == 0:
-                early_steps = time[1] * scaling_factors
+                early_steps = time[1] * integration_time_scaling_factors
                 integration_times = np.insert(time, 1, early_steps)
                 org_time_index = np.append([0], np.arange(len(early_steps) + 1, len(time) + len(early_steps)))
             else:
-                early_steps = time[0] * scaling_factors
+                early_steps = time[0] * integration_time_scaling_factors
                 integration_times = np.append(early_steps, time)
                 org_time_index = np.arange(len(early_steps), len(time) + len(early_steps))
 
