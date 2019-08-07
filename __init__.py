@@ -243,11 +243,15 @@ class KineticModel(object):
             else:
                 raise ValueError('New parameters must either be pd.Series or dictionary!!')
 
+        tolerances = {'atol': 1e-12, 'rtol': 1e-14}
         if new_parameters is None:
-            result = self.odesys.integrate(integration_times, c0, convert_parameters(self.parameters),
-                                           atol=1e-12, rtol=1e-14)
+            result = self.odesys.integrate(integration_times, c0,
+                                           convert_parameters(self.parameters),
+                                           **tolerances)
         else:
-            result = self.native_odesys.integrate(integration_times, c0, convert_parameters(new_parameters))
+            result = self.native_odesys.integrate(integration_times, c0,
+                                                  convert_parameters(new_parameters),
+                                                  **tolerances)
 
         # just get the concentrations at the input time steps; drop early_steps
         evaluation = result.yout[org_time_index]
