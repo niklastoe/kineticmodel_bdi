@@ -18,7 +18,7 @@ class KineticModel(object):
     """quickly build a kinetic model fitting """
 
     def __init__(self, exp_data, reaction_list_input,
-                 parameters=None, observed_species='product', educts=None):
+                 parameters=None, observed_species='educt', educts=None):
         self.exp_data = exp_data
         self.studied_concentration = exp_data.columns.name
         self.observed_species = observed_species
