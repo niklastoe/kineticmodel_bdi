@@ -229,7 +229,7 @@ class KineticModel(object):
 
         def convert_parameters(input_parameters):
             """convert pd.Series to dict where all rates are 10**x
-            WARNING: you cannot pass the pd.Series directly,
+            WARNING: you cannot pass the pd.Series directly to odesys.integrate,
             it will be treated like my_ds.values and rates will be wrongly associated!!"""
 
             input_type = type(input_parameters)
