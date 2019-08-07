@@ -199,13 +199,24 @@ class KineticModel(object):
         """evaluate concentration of all species at given times"""
         c0 = defaultdict(float, initial_concentrations)
 
-        # add early integration steps, this helps somehow with stability
-        early_steps = [time[1] / 10**i for i in np.arange(1,5)] # it should be very early indeed
-        integration_times = list(time) + early_steps
-        integration_times.sort()
-        # we will need the indeces of the original times later!
-        org_time_index = [integration_times.index(x) for x in time]
-        integration_times = np.array(integration_times)
+        def expand_integration_times():
+            # add early integration steps, this helps somehow with stability
+            scaling_factors = np.array([10 ** i for i in np.arange(-4., -0.)])
+
+            # to avoid sorting (slow) we want to insert them at the right position
+            if time[0] == 0:
+                early_steps = time[1] * scaling_factors
+                integration_times = np.insert(time, 1, early_steps)
+                org_time_index = np.append([0], np.arange(len(early_steps) + 1, len(time) + len(early_steps)))
+            else:
+                early_steps = time[0] * scaling_factors
+                integration_times = np.append(early_steps, time)
+                org_time_index = np.arange(len(early_steps), len(time) + len(early_steps))
+
+            # we will need the indeces of the original times later
+            return integration_times, org_time_index
+
+        integration_times, org_time_index = expand_integration_times()
 
         def convert_parameters(input_parameters):
             """convert pd.Series to dict where all rates are 10**x
