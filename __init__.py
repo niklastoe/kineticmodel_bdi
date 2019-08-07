@@ -287,23 +287,8 @@ class KineticModel(object):
             concentrations = self.evaluate_system(curr_starting_conc,
                                                   self.exp_data.index,
                                                   new_parameters=new_parameters)
-            educts_starting_conc = [curr_starting_conc[x] for x in self.educts if x in curr_starting_conc]
 
-            if observable == 'educt':
-                # check remaining concentration of educts
-                observed_activity = self.get_species_concentration(concentrations, self.educts)
-            elif observable == 'product':
-                # check how much product has been created and subtract it from starting concentration of educt
-                observed_activity = self.get_species_concentration(concentrations, self.products)
-                observed_activity = educts_starting_conc - observed_activity
-            elif observable in self.species:
-                """check concentration of any species of interest"""
-                observed_activity = self.get_species_concentration(concentrations, [observable])
-            elif type(observable) == list:
-                """check concentration of any species of interest"""
-                observed_activity = self.get_species_concentration(concentrations, observable)
-            else:
-                raise ValueError('Unknown observable!')
+            observed_activity = self.get_observed_activity(concentrations, curr_starting_conc, observable)
             modeled_data.append(observed_activity)
 
         modeled_data = np.array(modeled_data).T
@@ -321,6 +306,26 @@ class KineticModel(object):
             return modeled_data
         else:
             self.modeled_data = modeled_data
+
+    def get_observed_activity(self, concentrations, starting_conc, observable):
+        """return activity of desired observable from all concentrations"""
+        if observable == 'educt':
+            # check remaining concentration of educts
+            observed_activity = self.get_species_concentration(concentrations, self.educts)
+        elif observable == 'product':
+            # check how much product has been created and subtract it from starting concentration of educt
+            educts_starting_conc = [starting_conc[x] for x in self.educts if x in starting_conc]
+            observed_activity = self.get_species_concentration(concentrations, self.products)
+            observed_activity = educts_starting_conc - observed_activity
+        elif observable in self.species:
+            """check concentration of any species of interest"""
+            observed_activity = self.get_species_concentration(concentrations, [observable])
+        elif type(observable) == list:
+            """check concentration of any species of interest"""
+            observed_activity = self.get_species_concentration(concentrations, observable)
+        else:
+            raise ValueError('Unknown observable!')
+        return observed_activity
 
     def get_species_concentration(self, concentrations, observables):
         species_indeces = [self.species.index(x) for x in observables]
