@@ -8,7 +8,6 @@ import ipywidgets
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from scipy.optimize import curve_fit
 
 default_data_format = 'absolute'
 integration_time_scaling_factors = np.array([10 ** i for i in np.arange(-4., -0.)])
@@ -369,9 +368,7 @@ class KineticModel(object):
         return self.format_ydata(new_modeled_data, data_conversion=data_conversion)
 
     def format_ydata(self, data_array, data_conversion=default_data_format):
-        """format an array so that it can be accepted as ydata by scipy.optimize.curve_fit
-        1d, no values that are np.nan
-        By default, it will return data as % of initial activity, it can use all data_conversions, though!"""
+        """format data as 1d; no values that are np.nan"""
         if type(data_array) == pd.core.frame.DataFrame:
             organized_array = data_array.values
         else:
@@ -417,42 +414,6 @@ def create_rate_slider(rate_key, rates_dict=None, slider_range=5):
                                   orientation='horizontal',
                                   readout=True,
                                   readout_format='.1f')
-
-
-def optimize_kinetic_model(func_to_optimize, experimental_data, bounds=5):
-
-    # prepare names and starting values for the parameters
-    reaction_rates_guess = get_rates_dict_guess(func_to_optimize)
-    reaction_rates_names = reaction_rates_guess.index
-    starting_values_rates = reaction_rates_guess.values
-
-    # format experimental ydata (the ones the optimizer shall match) by building
-    ydata = KineticModel.format_ydata(experimental_data)
-
-    if type(bounds) == int or type(bounds) == float:
-        upper_bounds = starting_values_rates + bounds
-        lower_bounds = starting_values_rates - bounds
-    if type(bounds) == tuple:
-        lower_bounds, upper_bounds = bounds
-
-    if bounds is None:
-        popt, pcov = curve_fit(func_to_optimize, 'placeholder', ydata)
-    else:
-        popt, pcov = curve_fit(func_to_optimize, 'placeholder', ydata, bounds=(lower_bounds, upper_bounds))
-
-        # format reaction rates nicely in a pd.Series before returning it
-    popt_ds = pd.Series(popt, index=reaction_rates_names)
-    return popt_ds
-
-
-def retrieve_ydata(experimental_data, reactions_list, reaction_rates):
-    """model experimental data and format it like curve_fit needs it
-    this only requires adapting the input of the experimental data"""
-    reaction_rates_ds = pd.Series(reaction_rates)
-    parametrized_model = KineticModel(experimental_data, reactions_list, reaction_rates_ds)
-
-    ydata = parametrized_model.ydata_model()
-    return ydata
 
 
 def get_rates_dict_guess(func_to_inspect):
