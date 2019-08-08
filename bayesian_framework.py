@@ -2,7 +2,7 @@ import matplotlib.mlab as mlab
 from scipy.stats import laplace
 import types
 
-from sampyl import np
+import numpy as np
 from workflows.kinetic_modeling import default_data_format, KineticModel
 
 gaussian_pdf = mlab.normpdf
