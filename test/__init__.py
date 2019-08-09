@@ -60,6 +60,11 @@ class TestKineticModelBase(ut.TestCase):
         native_results = self.model.evaluate_system(c0, self.model.parameters)
         self.compare_two_kinetic_results(org_results, native_results)
 
+    def test_observables(self):
+        educt = self.model.model_exp_data(observable='educt', return_only=True)
+        product = self.model.model_exp_data(observable='product', return_only=True)
+        self.compare_two_kinetic_results(educt, product)
+
 
 class TestKineticModelFirst(TestKineticModelBase):
     __test__ = True
