@@ -12,11 +12,13 @@ class TestKineticModelBase(ut.TestCase):
         super(TestKineticModelBase, self).__init__(*args, **kwargs)
 
         self.time = np.arange(0., 3600., 300.)
-        self.k = -2.0
-        self.parameters = pd.Series({'k': self.k})
+        self.parameters = self.get_parameters()
         self.reactions = self.generate_reactions()
         self.true_data = self.generate_true_data()
         self.model = KineticModel(self.true_data, self.reactions, self.parameters, educts='A')
+
+    def get_parameters(self):
+        raise NotImplementedError
 
     def generate_reactions(self):
         raise NotImplementedError
@@ -30,7 +32,7 @@ class TestKineticModelBase(ut.TestCase):
 
         results = {}
         for x in c:
-            true_data = self.integrated_rate_law(x, self.time, self.k)
+            true_data = self.integrated_rate_law(x, self.time, self.parameters['k'])
             true_data = pd.Series(true_data, index=self.time)
             results[x] = true_data
 
@@ -62,13 +64,14 @@ class TestKineticModelBase(ut.TestCase):
         self.compare_two_kinetic_results(org_results, native_results)
 
     def test_observables(self):
+        """monitoring educt or product needs to yield the same result"""
         educt = self.model.model_exp_data(observable='educt', return_only=True)
         product = self.model.model_exp_data(observable='product', return_only=True)
         self.compare_two_kinetic_results(educt, product)
 
     # this should go last because it manipulates self.model
     def test_starting_conc_as_parameter(self):
-        new_parameters = pd.Series({'k': self.k, 'P0': -7})
+        new_parameters = pd.Series({'k': self.parameters['k'], 'P0': -7})
         self.model.species_w_variable_starting_concentration = ['P0']
         new_c0 = self.model.update_starting_concentration(new_parameters)
         self.assertEqual(new_c0['P'], 1e-7)
@@ -76,6 +79,9 @@ class TestKineticModelBase(ut.TestCase):
 
 class TestKineticModelFirst(TestKineticModelBase):
     __test__ = True
+
+    def get_parameters(self):
+        return pd.Series({'k': -2.})
 
     def generate_reactions(self):
         return [[{'A': 1}, {'P': 1}, 'k']]
@@ -88,6 +94,9 @@ class TestKineticModelFirst(TestKineticModelBase):
 
 class TestKineticModelSecond(TestKineticModelBase):
     __test__ = True
+
+    def get_parameters(self):
+        return pd.Series({'k': 3.})
 
     def generate_reactions(self):
         return [[{'A': 2}, {'P': 1, 'A': 1}, 'k']]
