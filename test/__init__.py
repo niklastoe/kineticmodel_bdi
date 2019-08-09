@@ -40,9 +40,25 @@ class TestKineticModelBase(ut.TestCase):
 
     def test_reproduction_integrated_rate_law(self):
         """kinetic model should yield identical result to integrated rate law"""
-        diff = self.true_data - self.model.modeled_data
+        self.compare_two_kinetic_results(self.true_data, self.model.modeled_data)
+
+    def compare_two_kinetic_results(self, resultA, resultB):
+        diff = resultA - resultB
         self.assertAlmostEqual(diff.sum().sum(), 0., delta=1e-9)
         self.assertLess(diff.max().max(), 1e-9)
+
+    def test_species(self):
+        self.assertEqual(self.model.species, ['A', 'P'])
+        self.assertEqual(self.model.starting_concentration, {'A': 0.0, 'P': 0.0})
+
+    def test_native_odesys(self):
+        """check that native odesys yields the same result as symbolic odesys"""
+        c0 = {'A': 1e-6}
+        org_results = self.model.evaluate_system(c0)
+
+        self.model.create_native_odesys()
+        native_results = self.model.evaluate_system(c0, self.model.parameters)
+        self.compare_two_kinetic_results(org_results, native_results)
 
 
 class TestKineticModelFirst(TestKineticModelBase):
