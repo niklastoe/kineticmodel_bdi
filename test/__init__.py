@@ -90,7 +90,7 @@ class TestKineticModelSecond(TestKineticModelBase):
     __test__ = True
 
     def generate_reactions(self):
-        return [[{'A': 2}, {'P': 1}, 'k']]
+        return [[{'A': 2}, {'P': 1, 'A': 1}, 'k']]
 
     def integrated_rate_law(self, A0, t, k):
         k_applied = 10**k
