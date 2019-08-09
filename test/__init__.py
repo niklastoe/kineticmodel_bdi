@@ -46,9 +46,9 @@ class TestKineticModelBase(ut.TestCase):
 
     def compare_two_kinetic_results(self, resultA, resultB):
         diff = resultA - resultB
-        self.assertAlmostEqual(diff.sum().sum(), 0., delta=1e-9)
-        self.assertLess(diff.max().max(), 1e-9)
-        self.assertLess(abs(diff.min().min()), 1e-9)
+        self.assertAlmostEqual(diff.sum().sum(), 0., delta=1e-11)
+        self.assertLess(diff.max().max(), 1e-11)
+        self.assertLess(abs(diff.min().min()), 1e-11)
 
     def test_species(self):
         self.assertEqual(self.model.species, ['A', 'P'])
