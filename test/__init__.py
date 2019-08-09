@@ -11,7 +11,7 @@ class TestKineticModelBase(ut.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestKineticModelBase, self).__init__(*args, **kwargs)
 
-        self.time = np.arange(0.,3600., 300.)
+        self.time = np.arange(0., 3600., 300.)
         self.k = -2.0
         self.parameters = pd.Series({'k': self.k})
         self.reactions = self.generate_reactions()
@@ -65,6 +65,13 @@ class TestKineticModelBase(ut.TestCase):
         educt = self.model.model_exp_data(observable='educt', return_only=True)
         product = self.model.model_exp_data(observable='product', return_only=True)
         self.compare_two_kinetic_results(educt, product)
+
+    # this should go last because it manipulates self.model
+    def test_starting_conc_as_parameter(self):
+        new_parameters = pd.Series({'k': self.k, 'P0': -7})
+        self.model.species_w_variable_starting_concentration = ['P0']
+        new_c0 = self.model.update_starting_concentration(new_parameters)
+        self.assertEqual(new_c0['P'], 1e-7)
 
 
 class TestKineticModelFirst(TestKineticModelBase):
