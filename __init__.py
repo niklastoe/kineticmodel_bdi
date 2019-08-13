@@ -283,7 +283,8 @@ class KineticModel(object):
                        observable='default',
                        only_exp_data=True,
                        return_only=False,
-                       new_parameters=None):
+                       new_parameters=None,
+                       return_df=False):
         """model the experimental data and return a pd.DataFrame which matches the format of the experimental one.
         If new parameters are given, this will use the native (C++) odesys and avoid pandas for speed up!"""
         if observable == 'default':
@@ -312,8 +313,11 @@ class KineticModel(object):
         if only_exp_data:
             modeled_data[np.where(np.isnan(self.exp_data.values))] = np.nan
 
-        # only format as pd.DataFrame if speed is not necessary
+        # format as pd.DataFrame if speed is not necessary
         if new_parameters is None:
+            return_df = True
+
+        if return_df:
             modeled_data = pd.DataFrame(modeled_data,
                                         index=self.exp_data.index,
                                         columns=self.exp_data.columns)
