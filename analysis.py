@@ -1,3 +1,4 @@
+import pandas as pd
 import xarray as xr
 
 from workflows.usability.jupyter_compatability import agnostic_tqdm
@@ -44,3 +45,21 @@ def plot_lines(parameter_sets, evaluation_func, sel_ax):
 def plot_posterior_predicitive_check(parameter_sets, evaluation_func, sel_ax):
     plot_confidence_intervals(parameter_sets, evaluation_func, sel_ax)
     evaluation_func('placeholder', return_exp_data=True).plot(style='o', ax=sel_ax)
+
+
+def calc_iid_interval(sampler):
+    acors = sampler.get_autocorr_time(tol=0)
+    return int(acors.max() + 1)
+
+
+def create_iid_df(sampler, reformat_parameters=None):
+    iid_interval = calc_iid_interval(sampler)
+    iid_points = sampler.chain[:, ::iid_interval]
+
+    # transform to parameter df
+    parameter_df = pd.DataFrame(iid_points.reshape(-1, len(sampler.parm_names)), columns=sampler.parm_names)
+    if reformat_parameters is None:
+        return parameter_df
+    else:
+        parameter_df_complete = pd.DataFrame([reformat_parameters(x[1]) for x in parameter_df.iterrows()])
+        return parameter_df_complete
