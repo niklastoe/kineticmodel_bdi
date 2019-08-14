@@ -1,4 +1,6 @@
+import numpy as np
 import pandas as pd
+import pymc
 import xarray as xr
 
 from workflows.usability.jupyter_compatability import agnostic_tqdm
@@ -63,3 +65,32 @@ def create_iid_df(sampler, reformat_parameters=None):
     else:
         parameter_df_complete = pd.DataFrame([reformat_parameters(x[1]) for x in parameter_df.iterrows()])
         return parameter_df_complete
+
+
+def calc_gelman_rubin(sampler_a, sampler_b):
+    """calculate R_hat according to Gelman-Rubin for two chains"""
+    # identify longer chain
+    lengths = [x.shape[0] for x in [sampler_a, sampler_b]]
+    min_length = min(lengths)
+
+    # both chains need to have identical length
+    trace_a = sampler_a[:min_length]
+    trace_b = sampler_b[:min_length]
+
+    trace_array = np.array([trace_a, trace_b])
+
+    return pymc.diagnostics.gelman_rubin(trace_array)
+
+
+def gelman_rubin_emcee_samplers(sampler_a, sampler_b):
+
+    check_parm_ordering = (sampler_a.parm_df.columns == sampler_b.parm_df.columns)
+    if not check_parm_ordering:
+        raise ValueError('parameters are not identical!!')
+
+    chain_a = sampler_a.parm_df.values
+    chain_b = sampler_b.parm_df.values
+
+    R_hat = calc_gelman_rubin(chain_a, chain_b)
+
+    return pd.Series(R_hat, index=sampler_a.parm_df.columns)
