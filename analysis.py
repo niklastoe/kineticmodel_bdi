@@ -14,7 +14,7 @@ def evaluate_parameters(parameters, model, return_exp_data=False):
         return model.model_exp_data(return_only=True, new_parameters=parameters, return_df=True)
 
 
-def calc_confidence_intervals(parameter_df, evaluation_func, quantiles=(0.05, 0.95)):
+def calc_confidence_intervals(parameter_df, evaluation_func, quantiles=(0.05, 0.5, 0.95)):
     """return confidence intervals given parameters and evaluation function"""
     ppc_samples = []
 
@@ -32,9 +32,12 @@ def calc_confidence_intervals(parameter_df, evaluation_func, quantiles=(0.05, 0.
 
 
 def plot_confidence_intervals(parameter_sets, evaluation_func, sel_ax):
-    confidence_lo, confidence_hi = calc_confidence_intervals(parameter_sets, evaluation_func)
+    confidence_lo, confidence_median, confidence_hi = calc_confidence_intervals(parameter_sets, evaluation_func)
     for col in confidence_lo:
-        sel_ax.fill_between(confidence_lo.index, confidence_lo[col], confidence_hi[col], alpha=0.6)
+        sel_ax.fill_between(confidence_lo.index, confidence_lo[col], confidence_hi[col], alpha=0.4)
+
+    confidence_median.plot(ax=sel_ax)
+    sel_ax.set_prop_cycle(None)
 
 
 def plot_lines(parameter_sets, evaluation_func, sel_ax):
