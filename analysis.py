@@ -89,14 +89,9 @@ def calc_gelman_rubin(sampler_a, sampler_b):
 
 
 def gelman_rubin_emcee_samplers(sampler_a, sampler_b):
-
-    check_parm_ordering = (sampler_a.parm_df.columns == sampler_b.parm_df.columns)
-    if not check_parm_ordering:
-        raise ValueError('parameters are not identical!!')
-
-    chain_a = sampler_a.parm_df.values
-    chain_b = sampler_b.parm_df.values
+    chain_a = sampler_a.parm_df[sampler_a.parm_names].values
+    chain_b = sampler_b.parm_df[sampler_a.parm_names].values
 
     R_hat = calc_gelman_rubin(chain_a, chain_b)
 
-    return pd.Series(R_hat, index=sampler_a.parm_df.columns)
+    return pd.Series(R_hat, index=sampler_a.parm_names)
