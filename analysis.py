@@ -36,7 +36,8 @@ def plot_confidence_intervals(parameter_sets, evaluation_func, sel_ax):
     for col in confidence_lo:
         sel_ax.fill_between(confidence_lo.index, confidence_lo[col], confidence_hi[col], alpha=0.4)
 
-    confidence_median.plot(ax=sel_ax)
+    sel_ax.set_prop_cycle(None)
+    confidence_median.plot(ax=sel_ax, legend=False)
     sel_ax.set_prop_cycle(None)
 
 
