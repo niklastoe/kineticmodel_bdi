@@ -1,3 +1,4 @@
+import copy
 import numpy as np
 import pandas as pd
 import pymc
@@ -96,3 +97,39 @@ def gelman_rubin_emcee_samplers(sampler_a, sampler_b):
     R_hat = calc_gelman_rubin(chain_a, chain_b)
 
     return pd.Series(R_hat, index=sampler_a.parm_names)
+
+
+def calc_reaction_rate(kinetic_data_df):
+    """return reaction rate in M/s for given dataframe of kinetic data"""
+    reaction_rates = []
+
+    for x in kinetic_data_df.iterrows():
+        for y in kinetic_data_df.iterrows():
+            t0, t1 = x[0], y[0]
+            t_diff = t1 - t0
+            if t_diff > 0:
+                c_diff = x[1] - y[1]
+                reaction_rates.append(c_diff / t_diff)
+
+    return np.log10(np.array(reaction_rates).max())
+
+
+def control_factor(model, curr_parameters, sel_parm, reformat_parameters=None):
+    """determine control factor for a given parameter to see if is rate determining or not"""
+    myparms = copy.deepcopy(curr_parameters)
+    if reformat_parameters is not None:
+        myparms = reformat_parameters(myparms)
+    kin_data = model.model_exp_data(return_only=True, return_df=True,
+                                       new_parameters=myparms)
+    org_rate = calc_reaction_rate(kin_data)
+
+    change_interval = -0.1
+    myparms[sel_parm] += change_interval
+    if reformat_parameters is not None:
+        myparms = reformat_parameters(myparms)
+    kin_data = model.model_exp_data(return_only=True, return_df=True, new_parameters=myparms)
+    new_rate = calc_reaction_rate(kin_data)
+
+    CF_abs = (new_rate - org_rate) / change_interval
+
+    return CF_abs
