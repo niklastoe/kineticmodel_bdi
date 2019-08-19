@@ -1,4 +1,5 @@
 import copy
+import json
 import numpy as np
 import pandas as pd
 import pymc
@@ -61,19 +62,45 @@ def calc_iid_interval(sampler):
 
 
 def create_iid_df(sampler, reformat_parameters=None):
+    """return DataFrame that contains points separated by tau
+    start at tau to discard some burn-in
+    also include logp and blobs"""
     iid_interval = calc_iid_interval(sampler)
     iid_points = sampler.chain[:, iid_interval::iid_interval]
     iid_lnprobability = sampler.lnprobability[iid_interval::iid_interval].flatten()
+    iid_blobs = sampler.blobs[iid_interval::iid_interval, :, 0].flatten()
 
     # transform to parameter df
     parameter_df = pd.DataFrame(iid_points.reshape(-1, len(sampler.parm_names)), columns=sampler.parm_names)
-    parameter_df['logp'] = iid_lnprobability
 
-    if reformat_parameters is None:
-        return parameter_df
-    else:
-        parameter_df_complete = pd.DataFrame([reformat_parameters(x[1]) for x in parameter_df.iterrows()])
-        return parameter_df_complete
+    blob_df = read_blob_df(iid_blobs)
+
+    if reformat_parameters is not None:
+        parameter_df = pd.DataFrame([reformat_parameters(x[1]) for x in parameter_df.iterrows()])
+
+    parameter_df['logp'] = iid_lnprobability
+    # merge both DataFrames
+    full_df = parameter_df.T.append(blob_df.T).T
+    return full_df
+
+
+def read_blob_df(blob_list):
+    """return DataFrame for blobs passed as a flat list"""
+    all_dicts = []
+    for x in blob_list:
+        # sometimes, the closing bracket is missing
+        # maybe even more is lost but since those are decimals, we do not care much
+        if x[-1] != '}':
+            x += '}'
+
+        try:
+            curr_dict = json.loads(x)
+        except:
+            print('Failure: ' + x)
+            print(x)
+        all_dicts.append(curr_dict)
+    blob_df = pd.DataFrame(all_dicts)
+    return blob_df
 
 
 def calc_gelman_rubin(sampler_a, sampler_b):
