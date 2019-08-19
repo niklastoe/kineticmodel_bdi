@@ -62,8 +62,8 @@ def calc_iid_interval(sampler):
 
 def create_iid_df(sampler, reformat_parameters=None):
     iid_interval = calc_iid_interval(sampler)
-    iid_points = sampler.chain[:, ::iid_interval]
-    iid_lnprobability = sampler.lnprobability[::iid_interval].flatten()
+    iid_points = sampler.chain[:, iid_interval::iid_interval]
+    iid_lnprobability = sampler.lnprobability[iid_interval::iid_interval].flatten()
 
     # transform to parameter df
     parameter_df = pd.DataFrame(iid_points.reshape(-1, len(sampler.parm_names)), columns=sampler.parm_names)
