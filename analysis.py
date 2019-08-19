@@ -5,6 +5,7 @@ import pymc
 import xarray as xr
 
 from workflows.usability.jupyter_compatability import agnostic_tqdm
+from workflows.kinetic_modeling import plot_df_w_nan
 
 
 def evaluate_parameters(parameters, model, return_exp_data=False):
@@ -35,10 +36,10 @@ def calc_confidence_intervals(parameter_df, evaluation_func, quantiles=(0.05, 0.
 def plot_confidence_intervals(parameter_sets, evaluation_func, sel_ax):
     confidence_lo, confidence_median, confidence_hi = calc_confidence_intervals(parameter_sets, evaluation_func)
     for col in confidence_lo:
-        sel_ax.fill_between(confidence_lo.index, confidence_lo[col], confidence_hi[col], alpha=0.4)
+        sel_ax.fill_between(confidence_lo[col].dropna().index, confidence_lo[col].dropna(), confidence_hi[col].dropna(), alpha=0.4)
 
     sel_ax.set_prop_cycle(None)
-    confidence_median.plot(ax=sel_ax, legend=False)
+    plot_df_w_nan(confidence_median, '-', axes=sel_ax)
     sel_ax.set_prop_cycle(None)
 
 
