@@ -47,7 +47,7 @@ def plot_confidence_intervals(parameter_sets, evaluation_func, sel_ax):
 def plot_lines(parameter_sets, evaluation_func, sel_ax):
     for x in agnostic_tqdm(parameter_sets.iterrows()):
         curr_results = evaluation_func(x[1])
-        curr_results.plot(ax=sel_ax)
+        plot_df_w_nan(curr_results, ax=sel_ax)
         sel_ax.set_prop_cycle(None)
 
 
