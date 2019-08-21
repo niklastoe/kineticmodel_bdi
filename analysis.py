@@ -51,8 +51,8 @@ def plot_lines(parameter_sets, evaluation_func, sel_ax):
         sel_ax.set_prop_cycle(None)
 
 
-def plot_posterior_predicitive_check(parameter_sets, evaluation_func, sel_ax):
-    plot_confidence_intervals(parameter_sets, evaluation_func, sel_ax)
+def plot_posterior_predicitive_check(parameter_sets, evaluation_func, sel_ax, plotting=plot_confidence_intervals):
+    plotting(parameter_sets, evaluation_func, sel_ax)
     evaluation_func('placeholder', return_exp_data=True).plot(style='o', ax=sel_ax, legend=False)
 
 
