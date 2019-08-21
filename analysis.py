@@ -144,7 +144,12 @@ def calc_reaction_rate(kinetic_data_df):
                 c_diff = x[1] - y[1]
                 reaction_rates.append(c_diff / t_diff)
 
-    return np.log10(np.array(reaction_rates).max())
+    reaction_rates = np.array(reaction_rates).flatten()
+    # get rid of nan entries
+    reaction_rates = reaction_rates[~np.isnan(reaction_rates)]
+    log_reaction_rates = np.log10(reaction_rates)
+
+    return log_reaction_rates.max()
 
 
 def control_factor(model, curr_parameters, sel_parm, reformat_parameters=None):
