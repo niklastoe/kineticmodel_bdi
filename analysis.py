@@ -94,11 +94,15 @@ def read_blob_df(blob_list):
         if x[-1] != '}':
             x += '}'
 
+        # sometimes, reading in the blobs will fail nevertheless because the string in blobs is cutoff
+        # in these cases, just set everything to NaN and discard the points
+        # we have enough points, as long as we do not expect that points in a certain regime cause this error...
+        # ...more frequently, there's no bias introduced
         try:
             curr_dict = json.loads(x)
         except:
             print('Failure: ' + x)
-            print(x)
+            curr_dict = {x: np.nan for x in curr_dict.keys()}
         all_dicts.append(curr_dict)
     blob_df = pd.DataFrame(all_dicts)
     return blob_df
