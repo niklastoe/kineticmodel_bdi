@@ -40,7 +40,7 @@ def plot_confidence_intervals(parameter_sets, evaluation_func, sel_ax):
         sel_ax.fill_between(confidence_lo[col].dropna().index, confidence_lo[col].dropna(), confidence_hi[col].dropna(), alpha=0.4)
 
     sel_ax.set_prop_cycle(None)
-    plot_df_w_nan(confidence_median, '-', axes=sel_ax)
+    plot_df_w_nan(confidence_median, ax=sel_ax)
     sel_ax.set_prop_cycle(None)
 
 

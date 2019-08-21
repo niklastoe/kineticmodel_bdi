@@ -268,7 +268,7 @@ class KineticModel(object):
             ax = exp_data.plot(style='o', legend=False)
             # ensure same styles (esp. colors) are used for experimental and modeled data
             ax.set_prop_cycle(None)
-            plot_df_w_nan(modeled_data, style="--x", axes=ax)
+            plot_df_w_nan(modeled_data, style="--x", ax=ax)
 
         else:
             plot_df_w_nan(exp_data, style="-o")
@@ -391,15 +391,15 @@ class KineticModel(object):
         self.native_odesys = native_sys['cvode'].from_other(self.odesys)
 
 
-def plot_df_w_nan(df, style, axes=None, alpha=1.):
+def plot_df_w_nan(df, style='-', ax=None, alpha=1.):
     """iterating over columns allows to drop nan entries
     nan entries disrupt lines"""
 
     # create axes if necessary
-    if axes is None:
-        axes = plt.axes()
+    if ax is None:
+        ax = plt.axes()
     for col in df:
-        df[col].dropna().plot(style=style, ax=axes, legend=False, alpha=alpha)
+        df[col].dropna().plot(style=style, ax=ax, legend=False, alpha=alpha)
 
 
 def create_rate_slider(rate_key, rates_dict=None, slider_range=5):
