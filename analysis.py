@@ -61,11 +61,12 @@ def calc_iid_interval(sampler):
     return int(acors.max() + 1)
 
 
-def create_iid_df(sampler, reformat_parameters=None):
+def create_iid_df(sampler, reformat_parameters=None, iid_interval=None):
     """return DataFrame that contains points separated by tau
     start at tau to discard some burn-in
     also include logp and blobs"""
-    iid_interval = calc_iid_interval(sampler)
+    if iid_interval is None:
+        iid_interval = calc_iid_interval(sampler)
     burn_in = iid_interval * 5
     iid_points = sampler.chain[:, burn_in::iid_interval]
     iid_lnprobability = sampler.lnprobability[burn_in::iid_interval].flatten()
