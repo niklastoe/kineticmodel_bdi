@@ -7,6 +7,7 @@ import xarray as xr
 
 from workflows.usability.jupyter_compatability import agnostic_tqdm
 from workflows.kinetic_modeling import plot_df_w_nan
+from workflows.kinetic_modeling.bayesian_framework import sigma_incl_factor
 
 
 def evaluate_parameters(parameters, model, return_exp_data=False):
@@ -14,8 +15,18 @@ def evaluate_parameters(parameters, model, return_exp_data=False):
     if return_exp_data:
         return model.exp_data
     else:
-        return model.model_exp_data(return_only=True, new_parameters=parameters, return_df=True)
-
+        if 'sigma_kin' in parameters:
+            sigma_kin = 10**parameters['sigma_kin']
+        else:
+            sigma_kin = 0
+        if 'f_kin' in parameters:
+            f_kin = 10**parameters['f_kin']
+        else:
+            f_kin = 0
+        modeled_result = model.model_exp_data(return_only=True, new_parameters=parameters, return_df=True)
+        if sigma_kin != 0 or f_kin != 0:
+            modeled_result.yerr = sigma_incl_factor(modeled_result, sigma_kin, f_kin)
+        return modeled_result
 
 def calc_confidence_intervals(parameter_df, evaluation_func, quantiles=(0.16, 0.5, 0.84)):
     """return confidence intervals given parameters and evaluation function"""
