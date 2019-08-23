@@ -8,6 +8,7 @@ from workflows.kinetic_modeling import default_data_format, KineticModel
 gaussian_pdf = mlab.normpdf
 laplace_pdf = laplace.pdf
 
+
 class Likelihood(object):
 
     def __init__(self,
@@ -89,7 +90,11 @@ class Likelihood(object):
         return log_likelihood
 
     def calc_probability_absolute_std(self, exp_value, modeled_value):
-        sigma = self.sigma_incl_factor(modeled_value, self.std_deviation, self.f)
+        sigma = sigma_incl_factor(modeled_value, self.std_deviation, self.f)
+        # if any modeled_value is infinity, set sigma to 1: probability is going to be -infinity
+        # and we need to avoid the error this would throw
+        if np.any(np.array(modeled_value) == np.inf):
+            sigma = 1.
         return self.norm(modeled_value, exp_value, sigma)
 
 
