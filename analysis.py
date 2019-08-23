@@ -17,7 +17,7 @@ def evaluate_parameters(parameters, model, return_exp_data=False):
         return model.model_exp_data(return_only=True, new_parameters=parameters, return_df=True)
 
 
-def calc_confidence_intervals(parameter_df, evaluation_func, quantiles=(0.05, 0.5, 0.95)):
+def calc_confidence_intervals(parameter_df, evaluation_func, quantiles=(0.16, 0.5, 0.84)):
     """return confidence intervals given parameters and evaluation function"""
     ppc_samples = []
 
