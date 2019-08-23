@@ -231,7 +231,7 @@ class KineticModel(object):
                 return convert_parameters(input_parameters.to_dict())
             elif input_type == dict:
                 formatted_parameters = {}
-                for x in input_parameters:
+                for x in self.model.params():
                     formatted_parameters[x] = 10 ** input_parameters[x]
                 return formatted_parameters
             else:
