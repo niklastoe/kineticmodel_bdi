@@ -15,7 +15,8 @@ class Likelihood(object):
                  data_conversion=default_data_format,
                  exp_data=None,
                  norm='gaussian',
-                 std_deviation=3.3):
+                 std_deviation=1.,
+                 f=0.):
         self.model = model
         self.data_conversion = data_conversion
 
@@ -29,6 +30,7 @@ class Likelihood(object):
                 self.exp_data = exp_data
 
         self.std_deviation = std_deviation
+        self.f = f
         if norm == 'gaussian':
             self.norm = gaussian_pdf
         elif norm == 'laplace':
@@ -87,5 +89,11 @@ class Likelihood(object):
         return log_likelihood
 
     def calc_probability_absolute_std(self, exp_value, modeled_value):
-        return self.norm(modeled_value, exp_value, self.std_deviation)
+        sigma = self.sigma_incl_factor(modeled_value, self.std_deviation, self.f)
+        return self.norm(modeled_value, exp_value, sigma)
 
+
+def sigma_incl_factor(modeled_value, std_deviation, f):
+    variance = std_deviation ** 2 + modeled_value ** 2 * f ** 2
+    sigma = np.sqrt(variance)
+    return sigma
