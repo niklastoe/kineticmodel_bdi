@@ -24,7 +24,12 @@ def calc_confidence_intervals(parameter_df, evaluation_func, quantiles=(0.16, 0.
     failed_attempts = 0
     for x in agnostic_tqdm(parameter_df.iterrows()):
         try:
-            ppc_samples.append(evaluation_func(x[1]))
+            curr_result = evaluation_func(x[1])
+            if hasattr(curr_result, 'yerr'):
+                ppc_samples.append(curr_result + curr_result.yerr)
+                ppc_samples.append(curr_result - curr_result.yerr)
+            else:
+                ppc_samples.append(curr_result)
         except RuntimeError:
             failed_attempts += 1
 

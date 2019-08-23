@@ -399,7 +399,11 @@ def plot_df_w_nan(df, style='-', ax=None, alpha=1.):
     if ax is None:
         ax = plt.axes()
     for col in df:
-        df[col].dropna().plot(style=style, ax=ax, legend=False, alpha=alpha)
+        if hasattr(df, 'yerr'):
+            yerr = df.yerr
+        else:
+            yerr = 0.
+        df[col].dropna().plot(yerr=yerr, style=style, ax=ax, legend=False, alpha=alpha)
 
 
 def create_rate_slider(rate_key, rates_dict=None, slider_range=5):
