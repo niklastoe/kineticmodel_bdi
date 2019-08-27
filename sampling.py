@@ -92,8 +92,11 @@ def evaluate_multiple_logp(dict_of_logps, parameters):
     return sum_logp, json.dumps(logps), ''
 
 
-def logp_factory(dict_of_logps):
+def logp_factory(dict_of_logps, incl_prior=None):
     """return a function that evaluates the sum of logps for all inputs"""
+
+    if incl_prior:
+        dict_of_logps['prior'] = incl_prior
 
     def logp_from_factory(**kwargs):
         return evaluate_multiple_logp(dict_of_logps, kwargs)
