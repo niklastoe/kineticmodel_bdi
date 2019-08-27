@@ -14,18 +14,18 @@ class SamplingEnvironment(object):
 
         self.reformat = reformatting_function
 
-    def log_prior(self, parameters):
+    def log_prior(self, **kwargs):
         """return sum of log priors for a dictionary of prior_functions"""
 
         if self.reformat is not None:
-            formatted_parameters = self.reformat(parameters, return_ds=False)
+            formatted_parameters = self.reformat(kwargs, return_ds=False)
         else:
-            formatted_parameters = parameters
+            formatted_parameters = kwargs
 
         prior = 0
         for sel_parameter in formatted_parameters.keys():
             if sel_parameter in self.prior_distributions.keys():
-                prior += self.prior_distributions[sel_parameter].logp_val(parameters[sel_parameter])
+                prior += self.prior_distributions[sel_parameter].logp_val(formatted_parameters[sel_parameter])
 
         return prior
 
@@ -66,7 +66,7 @@ def evaluate_multiple_logp(dict_of_logps, parameters):
 
     prior_func = [x for x in available_funcs if 'prior' in x]
     if len(prior_func) == 1:
-        curr_prior = dict_of_logps[prior_func[0]](parameters)
+        curr_prior = dict_of_logps[prior_func[0]](**parameters)
         logps['prior'] = curr_prior
     elif len(prior_func) == 0:
         curr_prior = 0
