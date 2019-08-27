@@ -101,5 +101,7 @@ def logp_factory(dict_of_logps, incl_prior=None):
     def logp_from_factory(**kwargs):
         return evaluate_multiple_logp(dict_of_logps, kwargs)
 
-    logp_from_factory.required_parameters = identify_necessary_parameters(dict_of_logps.values())
+    required_parameters = identify_necessary_parameters(dict_of_logps.values())
+    logp_from_factory.required_parameters = [x for x in required_parameters if x != 'self']
+
     return logp_from_factory
