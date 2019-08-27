@@ -7,12 +7,14 @@ from workflows.usability import create_parameter_dictionary_for_function, identi
 
 class SamplingEnvironment(object):
 
-    def __init__(self, prior_distribution_dict, reformatting_function=None):
+    def __init__(self, prior_distribution_dict, logp_dict, reformatting_function=None):
         self.prior_distributions = prior_distribution_dict
         for x in self.prior_distributions:
             self.prior_distributions[x].logp_val = partial(pymc_logp_val, dist=self.prior_distributions[x])
 
         self.reformat = reformatting_function
+
+        self.logp_func_parameters = logp_factory(logp_dict, self.log_prior)
 
     def log_prior(self, **kwargs):
         """return sum of log priors for a dictionary of prior_functions"""
