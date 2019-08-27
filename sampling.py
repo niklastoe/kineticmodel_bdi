@@ -31,22 +31,22 @@ class SamplingEnvironment(object):
 
         return prior
 
-    def random_start_positions(self, logp_func):
+    def random_start_positions(self):
         """generate random start positions which are not impossible i.e. have -np.inf probability"""
         current_score = -np.inf
         while ~np.isfinite(current_score):
-            required_parameters = identify_necessary_parameters([logp_func])
-            test_parameters = {x: float(self.prior_distributions[x].random()) for x in required_parameters}
+            required_parameters = self.logp_func_parameters.required_parameters
+            random_parameters = {x: float(self.prior_distributions[x].random()) for x in required_parameters}
 
             # calculate log_posterior
-            current_score = logp_func(**test_parameters)
+            current_score = self.logp_func_parameters(**random_parameters)
 
             # if logp_func passes more than just logp (e.g. dictionary to store as blob in emcee),
             # check what is the logp and use that!!
             if type(current_score) == tuple:
                 current_score = current_score[0]
 
-        return test_parameters
+        return random_parameters
 
 
 def pymc_logp_val(val, dist):
