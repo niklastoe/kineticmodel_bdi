@@ -84,9 +84,9 @@ def create_iid_df(sampler, reformat_parameters=None, iid_interval=None):
     if iid_interval is None:
         iid_interval = calc_iid_interval(sampler)
     burn_in = iid_interval * 5
-    iid_points = sampler.chain[:, burn_in::iid_interval]
-    iid_lnprobability = sampler.lnprobability[burn_in::iid_interval].flatten()
-    iid_blobs = sampler.blobs[burn_in::iid_interval, :, 0].flatten()
+    iid_points = sampler.get_chain(discard=burn_in, thin=iid_interval)
+    iid_lnprobability = sampler.get_log_prob(discard=burn_in, thin=iid_interval, flat=True)
+    iid_blobs = sampler.get_blobs(discard=burn_in, thin=iid_interval)[:,:,0].flatten()
 
     # transform to parameter df
     parameter_df = pd.DataFrame(iid_points.reshape(-1, len(sampler.parm_names)), columns=sampler.parm_names)
