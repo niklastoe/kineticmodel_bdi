@@ -1,6 +1,6 @@
-from functools import partial
 import numpy as np
 import json
+from scipy.stats import uniform
 
 from workflows.usability import create_parameter_dictionary_for_function, identify_necessary_parameters
 
@@ -9,8 +9,6 @@ class SamplingEnvironment(object):
 
     def __init__(self, prior_distribution_dict, logp_dict, reformatting_function=None):
         self.prior_distributions = prior_distribution_dict
-        for x in self.prior_distributions:
-            self.prior_distributions[x].logp_val = partial(pymc_logp_val, dist=self.prior_distributions[x])
 
         self.reformat = reformatting_function
 
@@ -27,7 +25,7 @@ class SamplingEnvironment(object):
         prior = 0
         for sel_parameter in formatted_parameters.keys():
             if sel_parameter in self.prior_distributions.keys():
-                prior += self.prior_distributions[sel_parameter].logp_val(formatted_parameters[sel_parameter])
+                prior += self.prior_distributions[sel_parameter].logpdf(formatted_parameters[sel_parameter])
 
         return prior
 
@@ -36,7 +34,7 @@ class SamplingEnvironment(object):
         current_score = -np.inf
         while ~np.isfinite(current_score):
             required_parameters = self.logp_func_parameters.required_parameters
-            random_parameters = {x: float(self.prior_distributions[x].random()) for x in required_parameters}
+            random_parameters = {x: float(self.prior_distributions[x].rvs()) for x in required_parameters}
 
             # calculate log_posterior
             current_score = self.logp_func_parameters(**random_parameters)
@@ -105,3 +103,8 @@ def logp_factory(dict_of_logps, incl_prior=None):
     logp_from_factory.required_parameters = [x for x in required_parameters if x != 'self']
 
     return logp_from_factory
+
+def uniform_minmax(val_min, val_max):
+    loc = val_min
+    scale = val_max - val_min
+    return uniform(loc, scale)
