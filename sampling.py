@@ -82,46 +82,6 @@ class SamplingEnvironment(object):
 
         return sampler
 
-    def sample_until_convergence(self, nsteps, thin_by=1):
-        """sample for nsteps, stop if autocorrelation time tau converges beforehand"""
-        # Check for convergence, taken from https://emcee.readthedocs.io/en/latest/tutorials/monitor/
-        # We'll track how the average autocorrelation time estimate changes
-
-        starting_pos = self.resume_positions_or_create_new_ones()
-
-        index = 0
-        autocorr = []
-
-        # This will be useful to testing convergence
-        old_tau = np.inf
-
-        # Now we'll sample for up to max_n steps
-        for sample in self.sampler.sample(starting_pos,
-                                          thin_by=thin_by,
-                                          iterations=nsteps,
-                                          progress=True):
-            # Only check convergence every n steps
-            if self.sampler.iteration % self.convergence_check_interval:
-                continue
-
-            # Compute the autocorrelation time so far
-            # Using tol=0 means that we'll always get an estimate even
-            # if it isn't trustworthy
-            tau = self.sampler.get_autocorr_time(tol=0)
-            autocorr.append(np.mean(tau))
-            index += 1
-
-            # Check convergence
-            converged = np.all(tau * self.min_iid < self.sampler.iteration)
-            converged &= np.all(np.abs(old_tau - tau) / tau < self.convergence_threshold)
-            if converged:
-                break
-            old_tau = tau
-
-        autocorr = pd.Series(autocorr, index=[i * self.convergence_check_interval for i in range(len(autocorr))])
-        self.sampler.autocorr_history = autocorr
-        return self.sampler
-
     def resume_positions_or_create_new_ones(self):
         """try to restart from the previous state, otherwise use random new starting positions"""
 
@@ -208,3 +168,48 @@ class uniform_minmax(object):
 
     def rvs(self):
         return self.min + (self.max - self.min) * np.random.rand()
+
+
+def sample_until_convergence(sampler, nsteps, starting_pos, thin_by=1):
+    """sample for nsteps, stop if autocorrelation time tau converges beforehand"""
+    # Check for convergence, taken from https://emcee.readthedocs.io/en/latest/tutorials/monitor/
+    # We'll track how the average autocorrelation time estimate changes
+
+    # after how many steps to check for convergence
+    convergence_check_interval = 1000
+    # how many samples we want at least
+    min_iid = 50
+    # max deviation between old_tau and tau to be considered converged
+    convergence_threshold = 0.01
+
+    index = 0
+    autocorr = []
+
+    # This will be useful to testing convergence
+    old_tau = np.inf
+
+    # Now we'll sample for up to max_n steps
+    for sample in sampler.sample(starting_pos,
+                                      thin_by=thin_by,
+                                      iterations=nsteps,
+                                      progress=True):
+        # Only check convergence every n steps
+        if sampler.iteration % convergence_check_interval:
+            continue
+
+        # Compute the autocorrelation time so far
+        # Using tol=0 means that we'll always get an estimate even
+        # if it isn't trustworthy
+        tau = sampler.get_autocorr_time(tol=0)
+        autocorr.append(np.mean(tau))
+        index += 1
+
+        # Check convergence
+        converged = np.all(tau * min_iid < sampler.iteration)
+        converged &= np.all(np.abs(old_tau - tau) / tau < convergence_threshold)
+        if converged:
+            break
+        old_tau = tau
+
+    autocorr = pd.Series(autocorr, index=[i * convergence_check_interval for i in range(len(autocorr))])
+    sampler.autocorr_history = autocorr
