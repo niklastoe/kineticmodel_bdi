@@ -194,7 +194,17 @@ def logp_factory(dict_of_logps, incl_prior=None):
 
     return logp_from_factory
 
-def uniform_minmax(val_min, val_max):
-    loc = val_min
-    scale = val_max - val_min
-    return uniform(loc, scale)
+class uniform_minmax(object):
+
+    def __init__(self, val_min, val_max):
+        self.min = val_min
+        self.max = val_max
+
+    def logpdf(self, value):
+        if self.min < value < self.max:
+            return 0.0
+        else:
+            return -np.inf
+
+    def rvs(self):
+        return self.min + (self.max - self.min) * np.random.rand()
