@@ -82,17 +82,17 @@ class SamplingEnvironment(object):
 
         return sampler
 
-    def resume_positions_or_create_new_ones(self):
+    def resume_positions_or_create_new_ones(self, sampler):
         """try to restart from the previous state, otherwise use random new starting positions"""
 
         starting_pos = None
         # if there are previous steps, continue and overwrite generated starting_pos
-        if hasattr(self.sampler, '_previous_state'):
-            if self.sampler._previous_state is not None:
-                starting_pos = self.sampler._previous_state.coords
+        if hasattr(sampler, '_previous_state'):
+            if sampler._previous_state is not None:
+                starting_pos = sampler._previous_state.coords
 
         if starting_pos is None:
-            starting_pos = np.array([self.random_start_positions().values() for x in range(self.sampler.nwalkers)])
+            starting_pos = np.array([self.random_start_positions().values() for x in range(sampler.nwalkers)])
 
         return starting_pos
 
