@@ -1,4 +1,4 @@
-from sampyl import np
+import numpy as np
 import pandas as pd
 
 from workflows.data_structure_manipulation import alter_listoflists_hierarchy
