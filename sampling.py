@@ -1,6 +1,7 @@
 import emcee
 import numpy as np
 import json
+import pandas as pd
 from scipy.stats import uniform
 
 from workflows.usability import create_parameter_dictionary_for_function, identify_necessary_parameters
@@ -14,6 +15,13 @@ class SamplingEnvironment(object):
         self.reformat = reformatting_function
 
         self.logp_func_parameters = logp_factory(logp_dict, self.log_prior)
+
+        # after how many steps to check for convergence
+        self.convergence_check_interval = 1000
+        # how many samples we want at least
+        self.min_iid = 50
+        # max deviation between old_tau and tau to be considered converged
+        self.convergence_threshold = 0.01
 
     def log_prior(self, **kwargs):
         """return sum of log priors for a dictionary of prior_functions"""
@@ -73,6 +81,52 @@ class SamplingEnvironment(object):
         sampler.parm_names = my_parms
 
         return sampler
+
+    def sample_until_convergence(self, nsteps):
+        """sample for nsteps, stop if autocorrelation time tau converges beforehand"""
+        # Check for convergence, taken from https://emcee.readthedocs.io/en/latest/tutorials/monitor/
+        # We'll track how the average autocorrelation time estimate changes
+
+        starting_pos = self.resume_positions_or_create_new_ones()
+
+        index = 0
+        autocorr = []
+
+        # This will be useful to testing convergence
+        old_tau = np.inf
+
+        # Now we'll sample for up to max_n steps
+        for sample in self.sampler.sample(starting_pos, iterations=nsteps, progress=True):
+            # Only check convergence every n steps
+            if self.sampler.iteration % self.convergence_check_interval:
+                continue
+
+            # Compute the autocorrelation time so far
+            # Using tol=0 means that we'll always get an estimate even
+            # if it isn't trustworthy
+            tau = self.sampler.get_autocorr_time(tol=0)
+            autocorr.append(np.mean(tau))
+            index += 1
+
+            # Check convergence
+            converged = np.all(tau * self.min_iid < self.sampler.iteration)
+            converged &= np.all(np.abs(old_tau - tau) / tau < self.convergence_threshold)
+            if converged:
+                break
+            old_tau = tau
+
+        autocorr = pd.Series(autocorr, index=[i * self.convergence_check_interval for i in range(len(autocorr))])
+        self.sampler.autocorr_history = autocorr
+        return self.sampler
+
+    def resume_positions_or_create_new_ones(self):
+        """try to restart from the previous state, otherwise use random new starting positions"""
+        starting_pos = np.array([self.random_start_positions().values() for x in range(self.sampler.nwalkers)])
+        # if there are previous steps, continue and overwrite generated starting_pos
+        if hasattr(self.sampler, '_previous_state'):
+            if self.sampler._previous_state is not None:
+                starting_pos = self.sampler._previous_state.coords
+        return starting_pos
 
 
 def pymc_logp_val(val, dist):
