@@ -82,7 +82,7 @@ class SamplingEnvironment(object):
 
         return sampler
 
-    def sample_until_convergence(self, nsteps):
+    def sample_until_convergence(self, nsteps, thin_by=1):
         """sample for nsteps, stop if autocorrelation time tau converges beforehand"""
         # Check for convergence, taken from https://emcee.readthedocs.io/en/latest/tutorials/monitor/
         # We'll track how the average autocorrelation time estimate changes
@@ -96,7 +96,10 @@ class SamplingEnvironment(object):
         old_tau = np.inf
 
         # Now we'll sample for up to max_n steps
-        for sample in self.sampler.sample(starting_pos, iterations=nsteps, progress=True):
+        for sample in self.sampler.sample(starting_pos,
+                                          thin_by=thin_by,
+                                          iterations=nsteps,
+                                          progress=True):
             # Only check convergence every n steps
             if self.sampler.iteration % self.convergence_check_interval:
                 continue
