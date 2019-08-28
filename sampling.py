@@ -1,8 +1,8 @@
+import copy
 import emcee
 import numpy as np
 import json
 import pandas as pd
-from scipy.stats import uniform
 
 from workflows.usability import create_parameter_dictionary_for_function, identify_necessary_parameters
 
@@ -14,7 +14,7 @@ class SamplingEnvironment(object):
 
         self.reformat = reformatting_function
 
-        self.logp_func_parameters = logp_factory(logp_dict, self.log_prior)
+        self.logp_func_parameters = logp_factory(copy.deepcopy(logp_dict), self.log_prior)
 
         # after how many steps to check for convergence
         self.convergence_check_interval = 1000
