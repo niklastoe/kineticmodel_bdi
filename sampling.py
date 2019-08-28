@@ -87,11 +87,9 @@ class SamplingEnvironment(object):
 
         starting_pos = None
         # if there are previous steps, continue and overwrite generated starting_pos
-        if hasattr(sampler, '_previous_state'):
-            if sampler._previous_state is not None:
-                starting_pos = sampler._previous_state.coords
-
-        if starting_pos is None:
+        try:
+            starting_pos = sampler.get_last_sample().coords
+        except AttributeError:
             starting_pos = np.array([self.random_start_positions().values() for x in range(sampler.nwalkers)])
 
         return starting_pos
