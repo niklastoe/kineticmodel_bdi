@@ -1,3 +1,4 @@
+import emcee
 import numpy as np
 import json
 from scipy.stats import uniform
@@ -45,6 +46,33 @@ class SamplingEnvironment(object):
                 current_score = current_score[0]
 
         return random_parameters
+
+    def setup_sampler(self, nwalkers, filename=None, sel_pool=None):
+        my_parm_dict = self.random_start_positions()
+        my_parms = my_parm_dict.keys()
+
+        def update_parameter_dict(theta):
+            return {my_parms[idx]: x for idx, x in enumerate(theta)}
+
+        def logp_func_theta(theta):
+            """calculate logp_func based on array of parameters, not dictionary"""
+            curr_parms = update_parameter_dict(theta)
+            return self.logp_func_parameters(**curr_parms)
+
+        ndims = len(my_parms)
+
+        if filename is not None:
+            backend = emcee.backends.HDFBackend(filename)
+        else:
+            backend = None
+        sampler = emcee.EnsembleSampler(nwalkers, ndims,
+                                        logp_func_theta,
+                                        backend=backend,
+                                        pool=sel_pool)
+
+        sampler.parm_names = my_parms
+
+        return sampler
 
 
 def pymc_logp_val(val, dist):
