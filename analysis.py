@@ -23,10 +23,19 @@ def evaluate_parameters(parameters, model, return_exp_data=False):
             f_kin = 10**parameters['f_kin']
         else:
             f_kin = 0
-        modeled_result = model.model_exp_data(return_only=True, new_parameters=parameters, return_df=True)
-        if sigma_kin != 0 or f_kin != 0:
-            modeled_result.yerr = sigma_incl_factor(modeled_result, sigma_kin, f_kin)
-        return modeled_result
+        modeled_result = model.model_exp_data(return_only=True,
+                                              new_parameters=parameters,
+                                              return_df=False)
+        sigma = sigma_incl_factor(modeled_result, sigma_kin, f_kin)
+
+        # get random number according to model and sigma
+        samples = np.random.normal(loc=modeled_result,
+                                   scale=sigma)
+        samples = pd.DataFrame(samples,
+                               columns=model.exp_data.columns,
+                               index=model.exp_data.index)
+
+        return samples
 
 def calc_confidence_intervals(parameter_df, evaluation_func, quantiles=(0.16, 0.5, 0.84)):
     """return confidence intervals given parameters and evaluation function"""
@@ -36,11 +45,7 @@ def calc_confidence_intervals(parameter_df, evaluation_func, quantiles=(0.16, 0.
     for x in agnostic_tqdm(parameter_df.iterrows()):
         try:
             curr_result = evaluation_func(x[1])
-            if hasattr(curr_result, 'yerr'):
-                ppc_samples.append(curr_result + curr_result.yerr)
-                ppc_samples.append(curr_result - curr_result.yerr)
-            else:
-                ppc_samples.append(curr_result)
+            ppc_samples.append(curr_result)
         except RuntimeError:
             failed_attempts += 1
 
