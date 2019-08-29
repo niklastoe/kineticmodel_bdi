@@ -4,8 +4,6 @@ import xarray as xr
 from workflows.kinetic_modeling.test import test_KineticModel
 from workflows.kinetic_modeling.bayesian_framework import Likelihood, OrdinaryStandardDeviation
 
-sel_std_dev = 1e-7
-
 
 class TestLikelihood(test_KineticModel.TestKineticModelFirst):
     __test__ = True
@@ -14,7 +12,8 @@ class TestLikelihood(test_KineticModel.TestKineticModelFirst):
         super(TestLikelihood, self).__init__(*args, **kwargs)
 
         self.model.create_native_odesys()
-        self.likelihood_ordinary_obj = Likelihood(self.model, OrdinaryStandardDeviation(sel_std_dev))
+        self.sel_std_dev = 1e-7
+        self.likelihood_ordinary_obj = Likelihood(self.model, OrdinaryStandardDeviation(self.sel_std_dev))
 
     def test_likelihood_creation(self):
         self.assertTrue(isinstance(self.likelihood_ordinary_obj, Likelihood))
@@ -36,8 +35,8 @@ class TestLikelihood(test_KineticModel.TestKineticModelFirst):
 
         mu = samples.mean(dim='samples').to_dataframe() - self.model.exp_data
         std = samples.std(dim='samples').to_dataframe()
-        self.assertAlmostEqual(mu.mean().mean(), 0, delta=5e-9)
-        self.assertAlmostEqual(std.mean().mean(), sel_std_dev, delta=sel_std_dev*0.1)
+        self.assertAlmostEqual(mu.mean().mean(), 0, delta=self.model.exp_data.max().max() * 5e-3)
+        self.assertAlmostEqual(std.mean().mean(), self.sel_std_dev, delta=self.sel_std_dev*0.1)
 
 if __name__ == '__main__':
     ut.main(verbosity=2)
