@@ -1,4 +1,5 @@
 import matplotlib.mlab as mlab
+import pandas as pd
 from scipy.stats import laplace
 import types
 
@@ -34,6 +35,7 @@ class Likelihood(object):
         self.f = f
         if norm == 'gaussian':
             self.norm = gaussian_pdf
+            self.draw_sample = np.random.normal
         elif norm == 'laplace':
             self.norm = laplace_pdf
         else:
@@ -42,6 +44,33 @@ class Likelihood(object):
         # this needs a 'placeholder' because no parameters are necessary to calculate the theoretical maximum
         self.max_likelihood = self.calc_likelihood('placeholder', max_likelihood=True)
         print('Highest theoretically possible likelihood: %f' % self.max_likelihood)
+
+    def evaluate_parameters(self, parameters, return_exp_data=False):
+        """return modeled data for given parameters and model or the experimental data"""
+        if return_exp_data:
+            return self.model.exp_data
+        else:
+            if 'sigma_kin' in parameters:
+                sigma_kin = 10 ** parameters['sigma_kin']
+            else:
+                sigma_kin = 0
+            if 'f_kin' in parameters:
+                f_kin = 10 ** parameters['f_kin']
+            else:
+                f_kin = 0
+            modeled_result = self.model.model_exp_data(return_only=True,
+                                                       new_parameters=parameters,
+                                                       return_df=False)
+            sigma = sigma_incl_factor(modeled_result, sigma_kin, f_kin)
+
+            # get random number according to model and sigma
+            samples = self.draw_sample(loc=modeled_result,
+                                       scale=sigma)
+            samples = pd.DataFrame(samples,
+                                   columns=self.model.exp_data.columns,
+                                   index=self.model.exp_data.index)
+
+            return samples
 
     def calc_likelihood(self, parameters, max_likelihood=False):
         """calculate how well the model fits the data.
