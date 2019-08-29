@@ -131,3 +131,39 @@ def sigma_incl_factor(modeled_value, std_deviation, f):
     variance = std_deviation ** 2 + modeled_value ** 2 * f ** 2
     sigma = np.sqrt(variance)
     return sigma
+class OrdinaryStandardDeviation(object):
+
+    def __init__(self, std_dev):
+        self.std_dev = std_dev
+
+    def return_std_dev(self, *args, **kwargs):
+        return self.std_dev
+
+
+class FixPlusFractionalStandardDeviation(object):
+
+    def __init__(self, sigma_name, f_name, format='log'):
+        self.sigma_name = sigma_name
+        self.f_name = f_name
+        self.format = format
+
+    def extract_parameters(self, parameters):
+        sigma = parameters[self.sigma_name]
+        f = parameters[self.f_name]
+        parameters = [sigma, f]
+        if self.format == 'log':
+            return np.power(10, parameters)
+        elif self.format == 'regular':
+            return parameters
+        else:
+            raise NotImplementedError('Can only deal with logarithmic nuisance parameters!')
+
+    def calculate_std_deviation(self, sigma, f, modeled_value):
+        variance = sigma ** 2 + modeled_value ** 2 * f ** 2
+        std_deviation = np.sqrt(variance)
+        return std_deviation
+
+    def return_std_dev(self, modeled_value, parameters):
+        sigma, f = self.extract_parameters(parameters)
+        std_deviation = self.calculate_std_deviation(sigma, f, modeled_value)
+        return std_deviation
