@@ -14,25 +14,23 @@ class Likelihood(object):
 
     def __init__(self,
                  model,
+                 std_deviation_obj,
+                 exp_data_formatted=None,
                  data_conversion=default_data_format,
-                 exp_data=None,
-                 norm='gaussian',
-                 std_deviation=1.,
-                 f=0.):
+                 norm='gaussian'):
         self.model = model
         self.data_conversion = data_conversion
 
         self.model_type = self.check_model()
         if self.model_type == 'kinetic':
+            self.exp_data_formatted = self.model.exp_data
             self.exp_data = self.generate_experimental_data()
         else:
-            if exp_data is None:
-                raise ValueError('You need to specify the experimental data!')
-            else:
-                self.exp_data = exp_data
+            self.exp_data_formatted = exp_data_formatted
+            self.exp_data = exp_data_formatted.values
 
-        self.std_deviation = std_deviation
-        self.f = f
+        self.std_deviation_obj = std_deviation_obj
+
         if norm == 'gaussian':
             self.norm = gaussian_pdf
             self.draw_sample = np.random.normal
@@ -40,35 +38,39 @@ class Likelihood(object):
             self.norm = laplace_pdf
         else:
             raise ValueError('Unknown norm!!')
-        
-        # this needs a 'placeholder' because no parameters are necessary to calculate the theoretical maximum
-        self.max_likelihood = self.calc_likelihood('placeholder', max_likelihood=True)
-        print('Highest theoretically possible likelihood: %f' % self.max_likelihood)
+
+        # calculate the maxmimum likelihood possible if standard deviation is constant
+        if isinstance(self.std_deviation_obj, OrdinaryStandardDeviation):
+            # this needs a 'placeholder' because no parameters are necessary to calculate the theoretical maximum
+            self.max_likelihood = self.calc_likelihood('placeholder', max_likelihood=True)
+            print('Highest theoretically possible likelihood: %f' % self.max_likelihood)
 
     def evaluate_parameters(self, parameters, return_exp_data=False):
         """return modeled data for given parameters and model or the experimental data"""
         if return_exp_data:
-            return self.model.exp_data
+            return self.exp_data_formatted
         else:
-            if 'sigma_kin' in parameters:
-                sigma_kin = 10 ** parameters['sigma_kin']
-            else:
-                sigma_kin = 0
-            if 'f_kin' in parameters:
-                f_kin = 10 ** parameters['f_kin']
-            else:
-                f_kin = 0
-            modeled_result = self.model.model_exp_data(return_only=True,
+            if self.model_type == 'kinetic':
+                modeled_result = self.model.model_exp_data(return_only=True,
                                                        new_parameters=parameters,
                                                        return_df=False)
-            sigma = sigma_incl_factor(modeled_result, sigma_kin, f_kin)
+            elif self.model_type == 'function':
+                modeled_result = self.model(parameters)
+            sigma = self.std_deviation_obj.return_std_dev(modeled_result, parameters)
 
             # get random number according to model and sigma
             samples = self.draw_sample(loc=modeled_result,
-                                       scale=sigma)
-            samples = pd.DataFrame(samples,
-                                   columns=self.model.exp_data.columns,
-                                   index=self.model.exp_data.index)
+                                              scale=sigma)
+
+            if isinstance(self.exp_data_formatted, pd.DataFrame):
+                samples = pd.DataFrame(samples,
+                                       index=self.exp_data_formatted.index,
+                                       columns=self.exp_data_formatted.columns)
+            elif isinstance(self.exp_data_formatted, pd.Series):
+                samples = pd.Series(samples,
+                                    index=self.exp_data_formatted.index)
+            else:
+                raise NotImplementedError('Need to provide formatted data as pd.DataFrame or pd.Series!')
 
             return samples
 
@@ -81,7 +83,8 @@ class Likelihood(object):
         else:
             model_data = self.generate_modeled_data(parameters)
 
-        log_likelihood = self.log_likelihood_for_datapoints(model_data)
+        sigma = self.std_deviation_obj.return_std_dev(model_data, parameters)
+        log_likelihood = self.log_likelihood_for_datapoints(model_data, sigma)
 
         return log_likelihood
 
@@ -110,16 +113,15 @@ class Likelihood(object):
 
         return model_data
 
-    def log_likelihood_for_datapoints(self, model_data):
+    def log_likelihood_for_datapoints(self, model_data, sigma):
         # generate a list of likelihoods for every single data point
-        individual_likelihoods = self.calc_probability_absolute_std(self.exp_data, model_data)
+        individual_likelihoods = self.calc_probability_absolute_std(self.exp_data, model_data, sigma)
 
         # sum the logs of all likelihoods and return them
         log_likelihood = np.log(individual_likelihoods).sum()
         return log_likelihood
 
-    def calc_probability_absolute_std(self, exp_value, modeled_value):
-        sigma = sigma_incl_factor(modeled_value, self.std_deviation, self.f)
+    def calc_probability_absolute_std(self, exp_value, modeled_value, sigma):
         # if any modeled_value is infinity, set sigma to 1: probability is going to be -infinity
         # and we need to avoid the error this would throw
         if np.any(np.array(modeled_value) == np.inf):
@@ -127,10 +129,6 @@ class Likelihood(object):
         return self.norm(modeled_value, exp_value, sigma)
 
 
-def sigma_incl_factor(modeled_value, std_deviation, f):
-    variance = std_deviation ** 2 + modeled_value ** 2 * f ** 2
-    sigma = np.sqrt(variance)
-    return sigma
 class OrdinaryStandardDeviation(object):
 
     def __init__(self, std_dev):
