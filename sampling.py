@@ -174,11 +174,11 @@ def sample_until_convergence(sampler, nsteps, starting_pos, thin_by=1):
     # We'll track how the average autocorrelation time estimate changes
 
     # after how many steps to check for convergence
-    convergence_check_interval = 1000
+    convergence_check_interval = 2500
     # how many samples we want at least
     min_iid = 50
     # max deviation between old_tau and tau to be considered converged
-    convergence_threshold = 0.01
+    convergence_threshold = 0.02
 
     index = 0
     autocorr = []
