@@ -192,7 +192,7 @@ def sample_until_convergence(sampler, nsteps, starting_pos, thin_by=1):
                                       iterations=nsteps,
                                       progress=True):
         # Only check convergence every n steps
-        if sampler.iteration % convergence_check_interval:
+        if sampler.iteration % (convergence_check_interval / thin_by):
             continue
 
         # Compute the autocorrelation time so far
