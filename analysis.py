@@ -29,9 +29,18 @@ def calc_confidence_intervals(parameter_df, evaluation_func, quantiles=(0.16, 0.
 
 def plot_confidence_intervals(parameter_sets, evaluation_func, sel_ax):
     confidence_lo, confidence_median, confidence_hi = calc_confidence_intervals(parameter_sets, evaluation_func)
-    for col in confidence_lo:
-        sel_ax.fill_between(confidence_lo[col].dropna().index, confidence_lo[col].dropna(), confidence_hi[col].dropna(), alpha=0.4)
+    plot_passed_intervals(confidence_lo, confidence_median, confidence_hi, sel_ax)
 
+
+def plot_passed_intervals(confidence_lo, confidence_median, confidence_hi, sel_ax):
+    for col in confidence_lo:
+        x = list(confidence_lo[col].dropna().index)
+        y_lo = list(confidence_lo[col].dropna())
+        y_hi = list(confidence_hi[col].dropna())
+        sel_ax.fill_between(x,
+                            y_lo,
+                            y_hi,
+                            alpha=0.4)
     sel_ax.set_prop_cycle(None)
     plot_df_w_nan(confidence_median, ax=sel_ax)
     sel_ax.set_prop_cycle(None)
