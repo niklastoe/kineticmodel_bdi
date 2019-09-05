@@ -181,7 +181,7 @@ def sample_until_convergence(sampler, nsteps, starting_pos, thin_by=1):
     convergence_threshold = 0.02
 
     index = 0
-    autocorr = []
+    autocorrelation = []
 
     # This will be useful to testing convergence
     old_tau = np.inf
@@ -199,7 +199,6 @@ def sample_until_convergence(sampler, nsteps, starting_pos, thin_by=1):
         # Using tol=0 means that we'll always get an estimate even
         # if it isn't trustworthy
         tau = sampler.get_autocorr_time(tol=0)
-        autocorr.append(np.mean(tau))
         index += 1
 
         # store in h5 file if one is written
@@ -209,6 +208,8 @@ def sample_until_convergence(sampler, nsteps, starting_pos, thin_by=1):
         if hasattr(sampler.backend, 'filename'):
             tau_df.to_hdf(sampler.backend.filename, 'autocorrelation', format='table', append=True)
 
+        autocorrelation.append(tau_df)
+
         # Check convergence
         converged = np.all(tau * min_iid < sampler.iteration)
         converged &= np.all(np.abs(old_tau - tau) / tau < convergence_threshold)
@@ -216,5 +217,4 @@ def sample_until_convergence(sampler, nsteps, starting_pos, thin_by=1):
             break
         old_tau = tau
 
-    autocorr = pd.Series(autocorr, index=[i * convergence_check_interval for i in range(len(autocorr))])
-    sampler.autocorr_history = autocorr
+    sampler.autocorrelation = pd.concat(autocorrelation)
