@@ -50,8 +50,23 @@ def posterior_predicitive_check(parameter_sets, evaluation_func, sel_ax, plottin
 
 
 def calc_iid_interval(sampler):
-    acors = sampler.get_autocorr_time(tol=0)
+
+    acors = None
+    # check if sampler has backend filename
+    if hasattr(sampler.backend, 'filename'):
+        try:
+            acors = read_last_autocorrelation(sampler)
+        except KeyError:
+            pass
+
+    # if autocorrelation could not be read from file, need to recalculate it
+    if acors is None:
+        acors = sampler.get_autocorr_time(tol=0)
     return int(acors.max() + 1)
+
+
+def read_last_autocorrelation(sampler):
+    return pd.read_hdf(sampler.backend.filename, key='autocorrelation').iloc[-1]
 
 
 def create_iid_df(sampler, reformat_parameters=None, iid_interval=None):
