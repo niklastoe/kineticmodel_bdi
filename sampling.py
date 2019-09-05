@@ -202,11 +202,12 @@ def sample_until_convergence(sampler, nsteps, starting_pos, thin_by=1):
         autocorr.append(np.mean(tau))
         index += 1
 
-        # store in h5 file
+        # store in h5 file if one is written
         tau_df = pd.DataFrame(tau.reshape(1,-1),
                               columns=sampler.parm_names,
                               index=[sampler.iteration])
-        tau_df.to_hdf(sampler.backend.filename, 'autocorrelation', format='table', append=True)
+        if hasattr(sampler.backend, 'filename'):
+            tau_df.to_hdf(sampler.backend.filename, 'autocorrelation', format='table', append=True)
 
         # Check convergence
         converged = np.all(tau * min_iid < sampler.iteration)
