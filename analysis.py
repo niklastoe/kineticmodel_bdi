@@ -28,8 +28,9 @@ def calc_confidence_intervals(parameter_df, evaluation_func, quantiles=(0.16, 0.
 
     for i in quantiles:
         array = ppc_samples.quantile(i, dim='samples')
-        if array.name is None:
-            array.name = 'placeholder'
+        if hasattr(array, 'name'):
+            if array.name is None:
+                array.name = 'placeholder'
         dfs.append(array.to_dataframe().drop('quantile', axis=1))
 
     return dfs
