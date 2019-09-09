@@ -24,7 +24,15 @@ def calc_confidence_intervals(parameter_df, evaluation_func, quantiles=(0.16, 0.
     print('Failed %s times' % failed_attempts)
     ppc_samples = xr.concat([df.to_xarray() for df in ppc_samples], "samples")
 
-    return [ppc_samples.quantile(i, dim='samples').to_dataframe().drop('quantile', axis=1) for i in quantiles]
+    dfs = []
+
+    for i in quantiles:
+        array = ppc_samples.quantile(i, dim='samples')
+        if array.name is None:
+            array.name = 'placeholder'
+        dfs.append(array.to_dataframe().drop('quantile', axis=1))
+
+    return dfs
 
 
 def plot_confidence_intervals(parameter_sets, evaluation_func, sel_ax):
