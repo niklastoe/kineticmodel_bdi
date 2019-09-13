@@ -187,9 +187,9 @@ def sample_until_convergence(sampler, nsteps, starting_pos, thin_by=1):
 
     # Now we'll sample for up to max_n steps
     for sample in sampler.sample(starting_pos,
-                                      thin_by=thin_by,
-                                      iterations=nsteps,
-                                      progress=True):
+                                 thin_by=thin_by,
+                                 iterations=nsteps,
+                                 progress=True):
         # Only check convergence every n steps
         if sampler.iteration % (convergence_check_interval / thin_by):
             continue
@@ -215,4 +215,5 @@ def sample_until_convergence(sampler, nsteps, starting_pos, thin_by=1):
             break
         old_tau = tau
 
-    sampler.autocorrelation = pd.concat(autocorrelation)
+    if len(autocorrelation) > 0:
+        sampler.autocorrelation = pd.concat(autocorrelation)
