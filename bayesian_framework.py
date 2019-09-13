@@ -39,6 +39,8 @@ class Likelihood(object):
         else:
             raise ValueError('Unknown norm!!')
 
+        self.theta = self.find_necessary_parameters()
+
         # calculate the maxmimum likelihood possible if standard deviation is constant
         if isinstance(self.std_deviation_obj, OrdinaryStandardDeviation):
             # this needs a 'placeholder' because no parameters are necessary to calculate the theoretical maximum
@@ -87,6 +89,22 @@ class Likelihood(object):
         log_likelihood = self.log_likelihood_for_datapoints(model_data, sigma)
 
         return log_likelihood
+
+    def find_necessary_parameters(self):
+        """return a list of necessary parameters to evaluate likelihood"""
+
+        success = False
+        curr_dict = {}
+        # catch KeyErrors until likelihood can be evaluated properly
+        while not success:
+            try:
+                self.calc_likelihood(curr_dict)
+                success = True
+            except KeyError, e:
+                missing_parm = e[0]
+                curr_dict[missing_parm] = 1
+
+        return curr_dict.keys()
 
     def check_model(self):
         if isinstance(self.model, KineticModel):
