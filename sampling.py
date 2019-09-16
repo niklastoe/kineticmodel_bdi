@@ -168,13 +168,13 @@ class uniform_minmax(object):
         return self.min + (self.max - self.min) * np.random.rand()
 
 
-def sample_until_convergence(sampler, nsteps, starting_pos, thin_by=1):
+def sample_until_convergence(sampler, nsteps, starting_pos,
+                             thin_by=1,
+                             convergence_check_interval=2500):
     """sample for nsteps, stop if autocorrelation time tau converges beforehand"""
     # Check for convergence, taken from https://emcee.readthedocs.io/en/latest/tutorials/monitor/
     # We'll track how the average autocorrelation time estimate changes
 
-    # after how many steps to check for convergence
-    convergence_check_interval = 2500
     # how many samples we want at least
     min_iid = 50
     # max deviation between old_tau and tau to be considered converged
