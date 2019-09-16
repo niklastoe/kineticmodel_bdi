@@ -1,5 +1,6 @@
 import copy
 import json
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pymc
@@ -87,6 +88,16 @@ def read_last_autocorrelation(sampler):
     return pd.read_hdf(sampler.backend.filename, key='autocorrelation').iloc[-1]
 
 
+def plot_autocorrelation(sampler):
+    """plot autocorrelation and plot line to see if at least 50*tau have been sampled"""
+    autocorrelation_df = pd.read_hdf(sampler.backend.filename, key='autocorrelation')
+
+    autocorrelation_df.plot()
+    plt.plot(autocorrelation_df.index, autocorrelation_df.index / 50)
+    plt.xlabel('steps')
+    plt.ylabel('tau')
+
+
 def create_iid_df(sampler, reformat_parameters=None, iid_interval=None):
     """return DataFrame that contains points separated by tau
     start at tau to discard some burn-in
@@ -96,7 +107,7 @@ def create_iid_df(sampler, reformat_parameters=None, iid_interval=None):
     burn_in = iid_interval * 5
     iid_points = sampler.get_chain(discard=burn_in, thin=iid_interval)
     iid_lnprobability = sampler.get_log_prob(discard=burn_in, thin=iid_interval, flat=True)
-    iid_blobs = sampler.get_blobs(discard=burn_in, thin=iid_interval)[:,:,0].flatten()
+    iid_blobs = sampler.get_blobs(discard=burn_in, thin=iid_interval)[: ,: ,0].flatten()
 
     # transform to parameter df
     parameter_df = pd.DataFrame(iid_points.reshape(-1, len(sampler.parm_names)), columns=sampler.parm_names)
