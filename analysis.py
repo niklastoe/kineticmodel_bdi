@@ -191,7 +191,8 @@ def calc_reaction_rate(kinetic_data_df):
 
 
 def control_factor(model, curr_parameters, sel_parm, reformat_parameters=None):
-    """determine control factor for a given parameter to see if is rate determining or not"""
+    """determine control factor for a given parameter to see if is rate determining or not
+    definition of control factors: taken from Parmon, Reaction Kinetics and Catalysis Letters, 2003, 79, 303-317"""
     myparms = copy.deepcopy(curr_parameters)
     if reformat_parameters is not None:
         myparms = reformat_parameters(myparms)
