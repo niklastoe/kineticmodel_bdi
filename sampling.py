@@ -19,6 +19,8 @@ class SamplingEnvironment(object):
 
         self.logp_func_parameters = logp_factory(logp_dict, self.reformat, self.log_prior)
 
+        self.required_parameters = self.find_necessary_parameters()
+
         # after how many steps to check for convergence
         self.convergence_check_interval = 1000
         # how many samples we want at least
@@ -40,8 +42,7 @@ class SamplingEnvironment(object):
         """generate random start positions which are not impossible i.e. have -np.inf probability"""
         current_score = -np.inf
         while ~np.isfinite(current_score):
-            required_parameters = self.find_necessary_parameters()
-            random_parameters = {x: float(self.prior_distributions[x].rvs()) for x in required_parameters}
+            random_parameters = {x: float(self.prior_distributions[x].rvs()) for x in self.required_parameters}
 
             # calculate log_posterior
             current_score = self.logp_func_parameters(random_parameters)
