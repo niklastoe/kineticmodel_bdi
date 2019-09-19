@@ -114,12 +114,9 @@ def pymc_logp_val(val, dist):
     return float(dist.logp(val).eval())
 
 
-def evaluate_multiple_likelihoods(dict_of_functions, parameters, reformat_func, curr_prior=0):
+def evaluate_multiple_likelihoods(dict_of_functions, formatted_parameters, curr_prior=0):
     """evaluate parameters for all given logp functions"""
     logps = {}
-
-    formatted_parameters = reformat_func(parameters)
-
     # don't waste time calculating the likelihood if prior is prohibitive
     if np.isfinite(curr_prior):
         for x in dict_of_functions:
@@ -148,12 +145,13 @@ def logp_factory(dict_of_likelihood_objects, reformat_func, prior_function=None)
         dict_of_functions['prior'] = prior_function
 
     def logp_from_factory(parameters, ignore_prior=False):
+        formatted_parameters = reformat_func(parameters)
         if ignore_prior:
             curr_prior = 0
         else:
-            curr_prior = dict_of_functions['prior'](reformat_func(parameters))
+            curr_prior = dict_of_functions['prior'](formatted_parameters)
 
-        return evaluate_multiple_likelihoods(dict_of_functions, parameters, reformat_func, curr_prior)
+        return evaluate_multiple_likelihoods(dict_of_functions, formatted_parameters, curr_prior)
 
     return logp_from_factory
 
