@@ -62,7 +62,7 @@ class SamplingEnvironment(object):
         # catch KeyErrors until likelihood can be evaluated properly
         while not success:
             try:
-                self.logp_func_parameters(curr_dict)
+                self.logp_func_parameters(curr_dict, ignore_prior=True)
                 success = True
             except KeyError, e:
                 missing_parm = e[0]
