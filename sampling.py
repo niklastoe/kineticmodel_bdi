@@ -151,7 +151,8 @@ def logp_factory(dict_of_likelihood_objects, reformat_func, prior_function=None)
 
     return logp_from_factory
 
-class uniform_minmax(object):
+
+class UniformMinMax(object):
 
     def __init__(self, val_min, val_max):
         self.min = val_min
@@ -199,7 +200,7 @@ def sample_until_convergence(sampler, nsteps, starting_pos,
         tau = sampler.get_autocorr_time(tol=0)
 
         # store in h5 file if one is written
-        tau_df = pd.DataFrame(tau.reshape(1,-1),
+        tau_df = pd.DataFrame(tau.reshape(1, -1),
                               columns=sampler.parm_names,
                               index=[sampler.iteration])
         if hasattr(sampler.backend, 'filename'):
