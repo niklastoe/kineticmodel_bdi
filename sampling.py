@@ -110,10 +110,6 @@ class SamplingEnvironment(object):
         return starting_pos
 
 
-def pymc_logp_val(val, dist):
-    return float(dist.logp(val).eval())
-
-
 def evaluate_multiple_likelihoods(dict_of_functions, formatted_parameters, curr_prior=0):
     """evaluate parameters for all given logp functions"""
     logps = {}
