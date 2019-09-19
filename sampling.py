@@ -6,15 +6,19 @@ import pandas as pd
 
 from workflows.usability import create_parameter_dictionary_for_function, identify_necessary_parameters
 
+def pass_dict(parameters):
+    """this function does nothing, it simply returns the input dictionary"""
+    return parameters
+
 
 class SamplingEnvironment(object):
 
-    def __init__(self, prior_distribution_dict, logp_dict, reformatting_function=None):
+    def __init__(self, prior_distribution_dict, logp_dict, reformatting_function=pass_dict):
         self.prior_distributions = prior_distribution_dict
 
         self.reformat = reformatting_function
 
-        self.logp_func_parameters = logp_factory(logp_dict, self.log_prior)
+        self.logp_func_parameters = logp_factory(logp_dict, self.reformat, self.log_prior)
 
         # after how many steps to check for convergence
         self.convergence_check_interval = 1000
@@ -26,15 +30,10 @@ class SamplingEnvironment(object):
     def log_prior(self, parameters):
         """return sum of log priors for a dictionary of prior_functions"""
 
-        if self.reformat is not None:
-            formatted_parameters = self.reformat(parameters, return_ds=False)
-        else:
-            formatted_parameters = parameters
-
         prior = 0
-        for sel_parameter in formatted_parameters.keys():
+        for sel_parameter in parameters.keys():
             if sel_parameter in self.prior_distributions.keys():
-                prior += self.prior_distributions[sel_parameter].logpdf(formatted_parameters[sel_parameter])
+                prior += self.prior_distributions[sel_parameter].logpdf(parameters[sel_parameter])
 
         return prior
 
@@ -99,16 +98,16 @@ def pymc_logp_val(val, dist):
     return float(dist.logp(val).eval())
 
 
-def evaluate_multiple_logp(dict_of_functions, parameters):
+def evaluate_multiple_likelihoods(dict_of_functions, parameters, reformat_func, curr_prior=0):
     """evaluate parameters for all given logp functions"""
     logps = {}
 
-    # calculate the prior first:  don't waste time calculating the likelihood if prior is prohibitive
-    curr_prior = dict_of_functions['prior'](parameters)
+    formatted_parameters = reformat_func(parameters)
 
+    # don't waste time calculating the likelihood if prior is prohibitive
     if np.isfinite(curr_prior):
         for x in dict_of_functions:
-            logps[x] = dict_of_functions[x](parameters)
+            logps[x] = dict_of_functions[x](formatted_parameters)
         sum_logp = sum(logps.values())
     # if prior is prohibitive, set likelihoods to np.nan
     else:
@@ -124,16 +123,21 @@ def evaluate_multiple_logp(dict_of_functions, parameters):
     return sum_logp, json.dumps(logps), ''
 
 
-def logp_factory(dict_of_likelihood_objects, incl_prior=None):
+def logp_factory(dict_of_likelihood_objects, reformat_func, prior_function=None):
     """return a function that evaluates the sum of logps for all inputs"""
 
     dict_of_functions = {x: dict_of_likelihood_objects[x].calc_likelihood for x in dict_of_likelihood_objects}
 
-    if incl_prior:
-        dict_of_functions['prior'] = incl_prior
+    if prior_function:
+        dict_of_functions['prior'] = prior_function
 
-    def logp_from_factory(parameters):
-        return evaluate_multiple_logp(dict_of_functions, parameters)
+    def logp_from_factory(parameters, ignore_prior=False):
+        if ignore_prior:
+            curr_prior = 0
+        else:
+            curr_prior = dict_of_functions['prior'](reformat_func(parameters))
+
+        return evaluate_multiple_likelihoods(dict_of_functions, parameters, reformat_func, curr_prior)
 
     return logp_from_factory
 
