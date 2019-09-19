@@ -80,7 +80,7 @@ class SamplingEnvironment(object):
         def logp_func_theta(theta):
             """calculate logp_func based on array of parameters, not dictionary"""
             curr_parms = update_parameter_dict(theta)
-            return self.logp_func_parameters(**curr_parms)
+            return self.logp_func_parameters(curr_parms)
 
         ndims = len(my_parms)
 
