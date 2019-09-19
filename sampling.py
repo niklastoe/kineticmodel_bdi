@@ -45,7 +45,7 @@ class SamplingEnvironment(object):
             random_parameters = {x: float(self.prior_distributions[x].rvs()) for x in required_parameters}
 
             # calculate log_posterior
-            current_score = self.logp_func_parameters(**random_parameters)
+            current_score = self.logp_func_parameters(random_parameters)
 
             # if logp_func passes more than just logp (e.g. dictionary to store as blob in emcee),
             # check what is the logp and use that!!
