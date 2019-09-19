@@ -23,13 +23,13 @@ class SamplingEnvironment(object):
         # max deviation between old_tau and tau to be considered converged
         self.convergence_threshold = 0.01
 
-    def log_prior(self, **kwargs):
+    def log_prior(self, parameters):
         """return sum of log priors for a dictionary of prior_functions"""
 
         if self.reformat is not None:
-            formatted_parameters = self.reformat(kwargs, return_ds=False)
+            formatted_parameters = self.reformat(parameters, return_ds=False)
         else:
-            formatted_parameters = kwargs
+            formatted_parameters = parameters
 
         prior = 0
         for sel_parameter in formatted_parameters.keys():
