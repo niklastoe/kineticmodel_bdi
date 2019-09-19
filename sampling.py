@@ -41,7 +41,7 @@ class SamplingEnvironment(object):
         """generate random start positions which are not impossible i.e. have -np.inf probability"""
         current_score = -np.inf
         while ~np.isfinite(current_score):
-            required_parameters = self.logp_func_parameters.required_parameters
+            required_parameters = self.find_necessary_parameters()
             random_parameters = {x: float(self.prior_distributions[x].rvs()) for x in required_parameters}
 
             # calculate log_posterior
@@ -53,6 +53,22 @@ class SamplingEnvironment(object):
                 current_score = current_score[0]
 
         return random_parameters
+
+    def find_necessary_parameters(self):
+        """return a list of necessary parameters for a function that takes one dictionary as input"""
+
+        success = False
+        curr_dict = {}
+        # catch KeyErrors until likelihood can be evaluated properly
+        while not success:
+            try:
+                self.logp_func_parameters(curr_dict)
+                success = True
+            except KeyError, e:
+                missing_parm = e[0]
+                curr_dict[missing_parm] = self.prior_distributions[missing_parm].rvs()
+
+        return curr_dict.keys()
 
     def setup_sampler(self, nwalkers, filename=None, sel_pool=None):
         my_parm_dict = self.random_start_positions()
