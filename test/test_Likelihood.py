@@ -26,12 +26,12 @@ class TestLikelihoodBase(test_KineticModel.TestKineticModelFirst):
         samples = []
 
         for x in range(100):
-            samples.append(self.likelihood_ordinary_obj.evaluate_parameters(self.get_parameters()))
+            samples.append(self.likelihood_ordinary_obj.generate_D_from_theta(self.get_parameters()))
 
         samples = xr.concat([df.to_xarray() for df in samples], "samples")
 
         # get the true observed values
-        y_exp = self.likelihood_ordinary_obj.evaluate_parameters(self.get_parameters(), return_exp_data=True)
+        y_exp = self.likelihood_ordinary_obj.generate_D_from_theta(self.get_parameters(), return_exp_data=True)
 
         # if observed/experimental data are stored in pd.Series, need to make sure that everything ends as a DataFrame
         # otherwise, comparison will be messed up

@@ -47,7 +47,7 @@ class Likelihood(object):
             self.max_likelihood = self.calc_likelihood('placeholder', max_likelihood=True)
             print('Highest theoretically possible likelihood: %f' % self.max_likelihood)
 
-    def evaluate_parameters(self, parameters, return_exp_data=False):
+    def generate_D_from_theta(self, parameters, return_exp_data=False):
         """return modeled data for given parameters and model or the experimental data"""
         if return_exp_data:
             return self.exp_data_formatted
