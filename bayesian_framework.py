@@ -11,6 +11,9 @@ laplace_pdf = laplace.pdf
 
 
 class Likelihood(object):
+    """p(D|theta)
+    calculate likelihood for given theta
+    generate data for given theta (e.g. for posterior predictive check)"""
 
     def __init__(self,
                  model,
