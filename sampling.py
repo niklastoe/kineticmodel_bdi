@@ -3,7 +3,8 @@ import numpy as np
 import json
 import pandas as pd
 
-from workflows.kinetic_modeling.bayesian_framework import find_necessary_parameters
+from workflows.kinetic_modeling.bayesian_framework import find_necessary_parameters, Likelihood
+from dill import PicklingError
 
 
 def dummy_reformatting_function(parameters):
@@ -64,6 +65,22 @@ class SamplingEnvironment(object):
         return random_parameters
 
     def setup_sampler(self, nwalkers, filename=None, sel_pool=None):
+
+        if sel_pool is not None:
+            if self.logp_func_parameters.Likelihood_instance_used_directly:
+                raise PicklingError("You cannot use Likelihood.calc_likelihood directly if you want to use Pool! "
+                                    "You need to define a function in your notebook for every instance of Likelihood"
+                                    " that calls Likelihood.calc_likelihood. "
+                                    "It's a bit stupid but I don't know how to avoid that! \n"
+                                    "The code looks like this: \n"
+                                    "\n"
+                                    "dict_of_functions = {} \n"
+                                    "for key in dict_of_likelihood_objects: \n"
+                                    "   def function_wrapper(parameters): \n"
+                                    "       return dict_of_likelihood_objects[key].calc_likelihood(parameters) \n"
+                                    "   function_wrapper.__name__ = key + '_likelihood_func_wrapper' \n"
+                                    "   dict_of_functions[key] = function_wrapper \n")
+
         my_parm_dict = self.random_start_positions()
         my_parms = my_parm_dict.keys()
 
@@ -128,7 +145,12 @@ def evaluate_multiple_likelihoods(dict_of_functions, formatted_parameters, curr_
 def logp_factory(dict_of_likelihood_objects, reformat_func, prior_function=None):
     """return a function that evaluates the sum of logps for all inputs"""
 
-    dict_of_functions = {x: dict_of_likelihood_objects[x].calc_likelihood for x in dict_of_likelihood_objects}
+    if type(dict_of_likelihood_objects.values()[0]) == Likelihood:
+        dict_of_functions = {x: dict_of_likelihood_objects[x].calc_likelihood for x in dict_of_likelihood_objects}
+        Likelihood_instance_used_directly = True
+    else:
+        dict_of_functions = dict_of_likelihood_objects
+        Likelihood_instance_used_directly = False
 
     if prior_function:
         dict_of_functions['prior'] = prior_function
@@ -142,6 +164,7 @@ def logp_factory(dict_of_likelihood_objects, reformat_func, prior_function=None)
 
         return evaluate_multiple_likelihoods(dict_of_functions, formatted_parameters, curr_prior)
 
+    logp_from_factory.Likelihood_instance_used_directly = Likelihood_instance_used_directly
     return logp_from_factory
 
 
