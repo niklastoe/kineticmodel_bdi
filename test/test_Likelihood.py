@@ -7,7 +7,7 @@ from workflows.kinetic_modeling.test import test_KineticModel
 from workflows.kinetic_modeling.bayesian_framework import Likelihood, OrdinaryStandardDeviation
 
 
-class TestLikelihoodBase(test_KineticModel.TestKineticModelFirst):
+class TestLikelihoodBase(ut.TestCase):
     __test__ = False
 
     def test_likelihood_creation(self):
@@ -50,7 +50,7 @@ class TestLikelihoodBase(test_KineticModel.TestKineticModelFirst):
         self.assertAlmostEqual(std.mean().mean(), self.sel_std_dev, delta=self.sel_std_dev*0.1)
 
 
-class TestLikelihoodKineticModel(TestLikelihoodBase):
+class TestLikelihoodKineticModel(TestLikelihoodBase, test_KineticModel.TestKineticModelFirst):
     __test__ = True
 
     def __init__(self, *args, **kwargs):
