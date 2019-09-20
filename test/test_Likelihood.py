@@ -70,10 +70,10 @@ class TestLikelihoodFunction(TestLikelihoodBase):
         self.range = np.arange(0, 10, 0.5)
 
         def line(parameters):
-            return self.range * parameters['m'] + parameters['b']
+            return self.range * 10**parameters['m'] + 10**parameters['b']
 
         def get_line_parameters():
-            return {'m': 1., 'b': 5.}
+            return {'m': 0., 'b': 1.}
 
         self.get_parameters = get_line_parameters
         exp_data_formatted = pd.Series(line(self.get_parameters()), index=self.range)
