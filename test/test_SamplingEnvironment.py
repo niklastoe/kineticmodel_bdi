@@ -4,6 +4,7 @@ import unittest as ut
 from workflows.kinetic_modeling.test import test_Likelihood
 from workflows.kinetic_modeling.sampling import SamplingEnvironment, UniformMinMax
 
+
 class TestSamplingEnvironment(test_Likelihood.TestLikelihoodFunction):
     __test__ = True
 
@@ -48,13 +49,18 @@ class TestSamplingEnvironment(test_Likelihood.TestLikelihoodFunction):
         nwalkers = 10
         sampler = self.env.setup_sampler(nwalkers)
         starting_positions = self.env.resume_positions_or_create_new_ones(sampler)
+        nparameters = 2
 
         # check that starting positions are of shape nwalkers x nparameters
-        self.assertEqual(starting_positions.shape, (nwalkers, 2))
+        self.assertEqual(starting_positions.shape, (nwalkers, nparameters))
 
         # perform one step
-        mcmc_output = sampler.run_mcmc(starting_positions, 1)
+        nsteps = 1
+        mcmc_output = sampler.run_mcmc(starting_positions, nsteps)
         self.assertEqual(type(mcmc_output), emcee.state.State)
+
+        self.assertEqual(sampler.chain.shape, (nwalkers, nsteps, nparameters))
+
 
 if __name__ == '__main__':
     ut.main(verbosity=2)
