@@ -13,6 +13,11 @@ def dummy_reformatting_function(parameters):
 
 
 class SamplingEnvironment(object):
+    """create everything that's necessary for sampling:
+    log_prior function
+    posterior function [evaluates prior and all passed likelihoods (from passed objects)]
+    emcee sampler
+    start positions for emcee sampler"""
 
     def __init__(self,
                  prior_distribution_dict,
