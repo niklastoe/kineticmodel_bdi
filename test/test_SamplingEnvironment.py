@@ -1,4 +1,5 @@
 import copy
+import emcee
 import unittest as ut
 from workflows.kinetic_modeling.test import test_Likelihood
 from workflows.kinetic_modeling.sampling import SamplingEnvironment, UniformMinMax
@@ -9,8 +10,8 @@ class TestSamplingEnvironment(test_Likelihood.TestLikelihoodFunction):
     def __init__(self, *args, **kwargs):
         super(TestSamplingEnvironment, self).__init__(*args, **kwargs)
 
-        prior_m = UniformMinMax(-1, 1)
-        prior_b = UniformMinMax(0, 2)
+        prior_m = UniformMinMax(-1e-10, 1e-10)
+        prior_b = UniformMinMax(1-1e-10, 1+1e-10)
         prior_distributions = {'m': prior_m,
                                'b': prior_b}
 
@@ -42,6 +43,18 @@ class TestSamplingEnvironment(test_Likelihood.TestLikelihoodFunction):
         # confirm that blobs are one string containing json and and empty string (weird thing by emcee)
         self.assertEqual(type(blobs[0]), str)
         self.assertEqual(blobs[1], '')
+
+    def test_setup_sampler_and_one_step(self):
+        nwalkers = 10
+        sampler = self.env.setup_sampler(nwalkers)
+        starting_positions = self.env.resume_positions_or_create_new_ones(sampler)
+
+        # check that starting positions are of shape nwalkers x nparameters
+        self.assertEqual(starting_positions.shape, (nwalkers, 2))
+
+        # perform one step
+        mcmc_output = sampler.run_mcmc(starting_positions, 1)
+        self.assertEqual(type(mcmc_output), emcee.state.State)
 
 if __name__ == '__main__':
     ut.main(verbosity=2)
