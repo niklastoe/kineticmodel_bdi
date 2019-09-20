@@ -6,14 +6,15 @@ import pandas as pd
 from workflows.kinetic_modeling.bayesian_framework import find_necessary_parameters
 
 
-def pass_dict(parameters):
-    """this function does nothing, it simply returns the input dictionary"""
+def dummy_reformatting_function(parameters):
+    """this function does nothing, it simply returns the input dictionary
+    it is necessary as a dummy reformatting_function (if you don't want/need any reformatting)"""
     return parameters
 
 
 class SamplingEnvironment(object):
 
-    def __init__(self, prior_distribution_dict, logp_dict, reformatting_function=pass_dict):
+    def __init__(self, prior_distribution_dict, logp_dict, reformatting_function=dummy_reformatting_function):
         self.prior_distributions = prior_distribution_dict
 
         self.reformat = reformatting_function
