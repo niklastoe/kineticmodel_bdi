@@ -180,7 +180,8 @@ class FixPlusFractionalStandardDeviation(object):
         else:
             raise NotImplementedError('Can only deal with logarithmic nuisance parameters!')
 
-    def calculate_std_deviation(self, sigma, f, modeled_value):
+    @staticmethod
+    def calculate_std_deviation(sigma, f, modeled_value):
         variance = sigma ** 2 + modeled_value ** 2 * f ** 2
         std_deviation = np.sqrt(variance)
         return std_deviation
