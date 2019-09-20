@@ -14,12 +14,14 @@ def dummy_reformatting_function(parameters):
 
 class SamplingEnvironment(object):
 
-    def __init__(self, prior_distribution_dict, logp_dict, reformatting_function=dummy_reformatting_function):
+    def __init__(self,
+                 prior_distribution_dict,
+                 likelihood_object_dict,
+                 reformatting_function=dummy_reformatting_function):
         self.prior_distributions = prior_distribution_dict
-
         self.reformat = reformatting_function
 
-        self.logp_func_parameters = logp_factory(logp_dict, self.reformat, self.log_prior)
+        self.logp_func_parameters = logp_factory(likelihood_object_dict, self.reformat, self.log_prior)
 
         self.required_parameters = find_necessary_parameters(self.logp_func_parameters, {'ignore_prior': True})
 
