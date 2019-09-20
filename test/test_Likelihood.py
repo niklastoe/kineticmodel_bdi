@@ -18,7 +18,7 @@ class TestLikelihoodBase(test_KineticModel.TestKineticModelFirst):
         likelihood = self.likelihood_ordinary_obj.calc_likelihood(self.get_parameters())
         self.assertAlmostEqual(likelihood, self.likelihood_ordinary_obj.max_likelihood, delta=1e-8)
 
-    def test_evaluation(self):
+    def test_generate_D_from_theta(self):
         """Posterior prediction should allow to recover input std_dev and mu (=y_model=y_exp in this case) by using the
         correct input parameters"""
 
