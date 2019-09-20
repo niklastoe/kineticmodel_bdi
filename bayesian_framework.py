@@ -39,7 +39,7 @@ class Likelihood(object):
         else:
             raise ValueError('Unknown norm!!')
 
-        self.theta_names = self.find_necessary_parameters()
+        self.theta_names = find_necessary_parameters(self.calc_likelihood)
 
         # calculate the maxmimum likelihood possible if standard deviation is constant
         if isinstance(self.std_deviation_obj, OrdinaryStandardDeviation):
@@ -95,22 +95,6 @@ class Likelihood(object):
         parameter_dict = dict(zip(self.theta_names, theta_values))
         return self.calc_likelihood(parameter_dict)
 
-    def find_necessary_parameters(self):
-        """return a list of necessary parameters to evaluate likelihood"""
-
-        success = False
-        curr_dict = {}
-        # catch KeyErrors until likelihood can be evaluated properly
-        while not success:
-            try:
-                self.calc_likelihood(curr_dict)
-                success = True
-            except KeyError, e:
-                missing_parm = e[0]
-                curr_dict[missing_parm] = 1
-
-        return curr_dict.keys()
-
     def check_model(self):
         if isinstance(self.model, KineticModel):
             return 'kinetic'
@@ -150,6 +134,23 @@ class Likelihood(object):
         if np.any(np.array(modeled_value) == np.inf):
             sigma = 1.
         return self.norm(modeled_value, exp_value, sigma)
+
+
+def find_necessary_parameters(function, function_kwargs={}):
+    """return a list of necessary parameters for a function that takes one dictionary as input"""
+
+    success = False
+    curr_dict = {}
+    # catch KeyErrors until function can be evaluated properly
+    while not success:
+        try:
+            function(curr_dict, **function_kwargs)
+            success = True
+        except KeyError, e:
+            missing_parm = e[0]
+            curr_dict[missing_parm] = 0
+
+    return curr_dict.keys()
 
 
 class OrdinaryStandardDeviation(object):

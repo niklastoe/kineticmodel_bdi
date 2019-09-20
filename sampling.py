@@ -4,6 +4,8 @@ import numpy as np
 import json
 import pandas as pd
 
+from workflows.kinetic_modeling.bayesian_framework import find_necessary_parameters
+
 
 def pass_dict(parameters):
     """this function does nothing, it simply returns the input dictionary"""
@@ -19,7 +21,7 @@ class SamplingEnvironment(object):
 
         self.logp_func_parameters = logp_factory(logp_dict, self.reformat, self.log_prior)
 
-        self.required_parameters = self.find_necessary_parameters()
+        self.required_parameters = find_necessary_parameters(self.logp_func_parameters, {'ignore_prior': True})
 
         # after how many steps to check for convergence
         self.convergence_check_interval = 1000
@@ -53,22 +55,6 @@ class SamplingEnvironment(object):
                 current_score = current_score[0]
 
         return random_parameters
-
-    def find_necessary_parameters(self):
-        """return a list of necessary parameters for a function that takes one dictionary as input"""
-
-        success = False
-        curr_dict = {}
-        # catch KeyErrors until likelihood can be evaluated properly
-        while not success:
-            try:
-                self.logp_func_parameters(curr_dict, ignore_prior=True)
-                success = True
-            except KeyError, e:
-                missing_parm = e[0]
-                curr_dict[missing_parm] = self.prior_distributions[missing_parm].rvs()
-
-        return curr_dict.keys()
 
     def setup_sampler(self, nwalkers, filename=None, sel_pool=None):
         my_parm_dict = self.random_start_positions()
