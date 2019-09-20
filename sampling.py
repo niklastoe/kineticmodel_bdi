@@ -1,4 +1,3 @@
-import copy
 import emcee
 import numpy as np
 import json

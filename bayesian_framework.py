@@ -54,15 +54,15 @@ class Likelihood(object):
         else:
             if self.model_type == 'kinetic':
                 modeled_result = self.model.model_exp_data(return_only=True,
-                                                       new_parameters=parameters,
-                                                       return_df=False)
+                                                           new_parameters=parameters,
+                                                           return_df=False)
             elif self.model_type == 'function':
                 modeled_result = self.model(parameters)
             sigma = self.std_deviation_obj.return_std_dev(modeled_result, parameters)
 
             # get random number according to model and sigma
             samples = self.draw_sample(loc=modeled_result,
-                                              scale=sigma)
+                                       scale=sigma)
 
             if isinstance(self.exp_data_formatted, pd.DataFrame):
                 samples = pd.DataFrame(samples,
