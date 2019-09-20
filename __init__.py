@@ -327,6 +327,14 @@ class KineticModel(object):
         else:
             self.modeled_data = modeled_data
 
+    def equilibrated_concentrations(self, concentration_sum, new_parameters):
+        """identify the concentration of individual species if only the sum of their concentrations are known"""
+        A, B = self.studied_concentration
+        K_Eq = self.determine_equilibrium_constant(A, B, new_parameters)
+        conc_A = concentration_sum / (1 + 10 ** K_Eq)
+        conc_B = concentration_sum / (1 + 10 ** -K_Eq)
+        return {A: conc_A, B: conc_B}
+
     def determine_equilibrium_constant(self, A, B, new_parameters):
         """calculate the equilibrium constant between species A and B given a dictionary of parameters containing
         conversion rate constants"""
