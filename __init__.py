@@ -327,6 +327,20 @@ class KineticModel(object):
         else:
             self.modeled_data = modeled_data
 
+    def determine_equilibrium_constant(self, A, B, new_parameters):
+        """calculate the equilibrium constant between species A and B given a dictionary of parameters containing
+        conversion rate constants"""
+        for x in self.reaction_list_input:
+            if (x[0].keys() == [A]) and (x[1].keys() == [B]):
+                k_AB = x[-1]
+            elif (x[0].keys() == [B]) and (x[1].keys() == [A]):
+                k_BA = x[-1]
+        if new_parameters:
+            K_Eq = new_parameters[k_AB] - new_parameters[k_BA]
+        else:
+            K_Eq = self.parameters[k_AB] - self.parameters[k_BA]
+        return K_Eq
+
     def get_observed_activity(self, concentrations, starting_conc, observable):
         """return activity of desired observable from all concentrations"""
         if observable == 'educt':
