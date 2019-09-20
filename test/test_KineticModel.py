@@ -108,5 +108,32 @@ class TestKineticModelSecond(TestKineticModelBase):
         return At
 
 
+class TestKineticModelEquilibrium(CompareKineticResults):
+    __test__ = True
+
+    def __init__(self, *args, **kwargs):
+        super(TestKineticModelEquilibrium, self).__init__(*args, **kwargs)
+
+        times = np.arange(0, 3600, 60)
+        conc_A = np.array([10e-6] * len(times))
+        exp_data = pd.DataFrame({10e-6: conc_A, 50e-6: 5*conc_A}, index=times)
+        exp_data.columns.name = ['A', 'D']
+
+        reactions = [[{'A': 1}, {'D': 1}, 'k_AD'],
+                     [{'D': 1}, {'A': 1}, 'k_DA']]
+
+        parameters = pd.Series({'k_AD': 1., 'k_DA': 1.})
+
+        self.model = KineticModel(exp_data, reactions, parameters)
+
+    def test_equilibrium_works(self):
+        # if we look at the sum of A and D, the exp_data is correct...
+        self.compare_two_kinetic_results(self.model.exp_data,
+                                         self.model.model_exp_data(observable=['A', 'D'], return_only=True))
+        # ...the concentration of A alone should be half as much
+        self.compare_two_kinetic_results(self.model.exp_data * 0.5,
+                                         self.model.model_exp_data(observable='A', return_only=True))
+
+
 if __name__ == '__main__':
     ut.main(verbosity=2)
