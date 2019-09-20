@@ -16,6 +16,7 @@ class TestKineticModelBase(ut.TestCase):
         self.reactions = self.generate_reactions()
         self.true_data = self.generate_true_data()
         self.model = KineticModel(self.true_data, self.reactions, self.parameters, educts='A')
+        self.model.create_native_odesys()
 
     def get_parameters(self):
         raise NotImplementedError
@@ -59,7 +60,6 @@ class TestKineticModelBase(ut.TestCase):
         c0 = {'A': 1e-6}
         org_results = self.model.evaluate_system(c0)
 
-        self.model.create_native_odesys()
         native_results = self.model.evaluate_system(c0, self.model.parameters)
         self.compare_two_kinetic_results(org_results, native_results)
 

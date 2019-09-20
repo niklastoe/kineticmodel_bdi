@@ -56,7 +56,6 @@ class TestLikelihoodKineticModel(TestLikelihoodBase):
     def __init__(self, *args, **kwargs):
         super(TestLikelihoodKineticModel, self).__init__(*args, **kwargs)
 
-        self.model.create_native_odesys()
         self.sel_std_dev = 1e-7
         self.likelihood_ordinary_obj = Likelihood(self.model, OrdinaryStandardDeviation(self.sel_std_dev))
 
