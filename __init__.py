@@ -298,7 +298,11 @@ class KineticModel(object):
         modeled_data = []
 
         for conc_idx, conc in enumerate(self.exp_data.columns):
-            curr_starting_conc[self.studied_concentration] = conc
+            if type(self.studied_concentration) == str:
+                curr_starting_conc[self.studied_concentration] = conc
+            elif type(self.studied_concentration) == list:
+                curr_starting_conc.update(self.equilibrated_concentrations(conc, new_parameters))
+
             concentrations = self.evaluate_system(curr_starting_conc,
                                                   new_parameters=new_parameters)
 
