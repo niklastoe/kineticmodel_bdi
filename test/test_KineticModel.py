@@ -4,8 +4,15 @@ import pandas as pd
 
 from workflows.kinetic_modeling import KineticModel
 
+class CompareKineticResults(ut.TestCase):
 
-class TestKineticModelBase(ut.TestCase):
+    def compare_two_kinetic_results(self, resultA, resultB):
+        diff = resultA - resultB
+        self.assertAlmostEqual(diff.sum().sum(), 0., delta=1e-11)
+        self.assertLess(diff.max().max(), 1e-11)
+        self.assertLess(abs(diff.min().min()), 1e-11)
+
+class TestKineticModelBase(CompareKineticResults):
     __test__ = False
 
     def __init__(self, *args, **kwargs):
@@ -44,12 +51,6 @@ class TestKineticModelBase(ut.TestCase):
     def test_reproduction_integrated_rate_law(self):
         """kinetic model should yield identical result to integrated rate law"""
         self.compare_two_kinetic_results(self.true_data, self.model.modeled_data)
-
-    def compare_two_kinetic_results(self, resultA, resultB):
-        diff = resultA - resultB
-        self.assertAlmostEqual(diff.sum().sum(), 0., delta=1e-11)
-        self.assertLess(diff.max().max(), 1e-11)
-        self.assertLess(abs(diff.min().min()), 1e-11)
 
     def test_species(self):
         self.assertEqual(self.model.species, ['A', 'P'])
