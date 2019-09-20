@@ -62,7 +62,7 @@ class TestLikelihoodKineticModel(TestLikelihoodBase):
 
 
 class TestLikelihoodFunction(TestLikelihoodBase):
-    __test__ = True
+    __test__ = False
 
     def __init__(self, *args, **kwargs):
         super(TestLikelihoodFunction, self).__init__(*args, **kwargs)

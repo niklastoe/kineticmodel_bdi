@@ -78,7 +78,7 @@ class TestKineticModelBase(ut.TestCase):
 
 
 class TestKineticModelFirst(TestKineticModelBase):
-    __test__ = True
+    __test__ = False
 
     def get_parameters(self):
         return pd.Series({'k': -2.})
