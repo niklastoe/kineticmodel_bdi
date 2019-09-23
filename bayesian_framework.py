@@ -19,8 +19,7 @@ class Likelihood(object):
                  model,
                  std_deviation_obj,
                  exp_data_formatted=None,
-                 data_conversion=default_data_format,
-                 norm='gaussian'):
+                 data_conversion=default_data_format):
         self.model = model
         self.data_conversion = data_conversion
 
@@ -34,6 +33,7 @@ class Likelihood(object):
 
         self.std_deviation_obj = std_deviation_obj
 
+        norm = 'gaussian'
         if norm == 'gaussian':
             self.norm = gaussian_pdf
             self.draw_sample = np.random.normal
