@@ -8,8 +8,7 @@ import ipywidgets
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import json
-import yaml
+import pickle
 
 from workflows.usability import get_parameter_names_from_function
 
@@ -420,16 +419,15 @@ class KineticModel(object):
         It is much faster than the other one for numerous sets of parameters but requires some time for setup."""
         self.native_odesys = native_sys['cvode'].from_other(self.odesys)
 
-    def json_dump_model_specification(self, filename):
+    def pickle_dump_model_specification(self, filename):
         """get all model specifications and pickle them as one dictionary
         Unfortunately, one cannot store the entire object using dill,
         trying to load it dill either reaches the maximum recursion depth or if one raises it, the kernel dies"""
 
         model_specifications = self.model_specifications_as_dictionary()
-        model_specifications = convert_pd_entries_to_json(model_specifications)
 
         with open(filename, 'wb') as f:
-            json.dump(model_specifications, f)
+            pickle.dump(model_specifications, f)
 
     def model_specifications_as_dictionary(self):
         specification_names = get_parameter_names_from_function(self.__init__)
@@ -438,57 +436,11 @@ class KineticModel(object):
         return model_specifications
 
 
-def convert_pd_entries_to_json(model_specifications, mode='write'):
-    """convert pandas objects to json using the pandas routine,
-    json does not know what to do with it"""
-
-    for key in model_specifications:
-        curr_entry = model_specifications[key]
-        if key in ['parameters']:
-            if mode == 'write':
-                model_specifications[key] = curr_entry.to_json()
-            elif mode == 'read':
-                model_specifications[key] = pd.Series(json.loads(curr_entry))
-        # in order to preserve column.name and index.name, we need to make column and index part of the DataFrame
-        # that's really annoying, I couldn't find a direct to_json function that could do this, though!
-        elif key in ['exp_data']:
-            if mode == 'write':
-                # add index in its own column
-                df = curr_entry.reset_index()
-                # add column labels as entry
-                columns = pd.Series(df.columns)
-                df.columns = np.arange(len(df.columns))
-                df = df.append(columns)
-                model_specifications[key] = df.to_json()
-            elif mode == 'read':
-                df = pd.read_json(curr_entry)
-                # restore columns
-                df.columns = df.iloc[-1]
-                df.columns.name = str(df.columns.name)
-
-                # restore index
-                df.index = df[df.columns[0]]
-                df = df.sort_index()
-
-                # remove superflous column containing index and entry containing column labels
-                df = df[df.columns[1:]]
-                df = df.iloc[:-1]
-                model_specifications[key] = df
-        # json will read in dict.keys() as unicode but chempy cannot handle that, it needs string there!
-        # yaml will read to string, not unicode
-        if key == 'reaction_list_input':
-            if mode == 'read':
-                model_specifications[key] = yaml.safe_load(json.dumps(curr_entry))
-
-    return model_specifications
-
-
-def load_json_model_specifications(filename):
+def load_pickle_model_specifications(filename):
     """create a KineticModel based on the """
     with open(filename, 'rb') as f:
-        model_specifications = json.load(f)
+        model_specifications = pickle.load(f)
 
-    model_specifications = convert_pd_entries_to_json(model_specifications, mode='read')
     return KineticModel(**model_specifications)
 
 
