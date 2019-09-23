@@ -4,7 +4,10 @@ from scipy.stats import laplace
 import types
 
 import numpy as np
-from workflows.kinetic_modeling import default_data_format, KineticModel
+import pickle
+
+from workflows.kinetic_modeling import default_data_format, KineticModel, load_pickle_model_specifications
+from workflows.usability import get_parameter_names_from_function
 
 gaussian_pdf = mlab.normpdf
 laplace_pdf = laplace.pdf
@@ -137,6 +140,46 @@ class Likelihood(object):
         if np.any(np.array(modeled_value) == np.inf):
             sigma = 1.
         return self.norm(modeled_value, exp_value, sigma)
+
+    def likelihood_specifications_as_dictionary(self):
+        specification_names = get_parameter_names_from_function(self.__init__)
+        specification_names.remove('self')
+        specification_names.remove('model')
+        model_specifications = {x: getattr(self, x) for x in specification_names}
+        return model_specifications
+
+    def pickle_dump_likelihood_specification(self,
+                                             likelihood_specifications_filename,
+                                             model_specifications_filename):
+        """get all model specifications and pickle them as one dictionary
+        Unfortunately, one cannot store the entire object using dill,
+        trying to load it dill either reaches the maximum recursion depth or if one raises it, the kernel dies"""
+
+        likelihood_specifications = self.likelihood_specifications_as_dictionary()
+
+        with open(likelihood_specifications_filename, 'wb') as f:
+            pickle.dump(likelihood_specifications , f)
+
+        if self.model_type == 'kinetic':
+            self.model.pickle_dump_model_specification(model_specifications_filename)
+        else:
+            with open(model_specifications_filename, 'wb') as f:
+                pickle.dump(self.model, f)
+
+
+def load_pickle_likelihood_specifications(likelihood_specifications_filename, model_specifications_filename):
+    """create a KineticModel based on the """
+    with open(likelihood_specifications_filename, 'rb') as f:
+        likelihood_specifications = pickle.load(f)
+
+    try:
+        model = load_pickle_model_specifications(model_specifications_filename)
+        model.create_native_odesys()
+    except TypeError:
+        with open(model_specifications_filename, 'rb') as f:
+            model = pickle.load(f)
+    likelihood_specifications['model'] = model
+    return Likelihood(**likelihood_specifications)
 
 
 def find_necessary_parameters(function, function_kwargs={}):
