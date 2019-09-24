@@ -64,7 +64,8 @@ class Likelihood(object):
                                                            return_df=False)
             elif self.model_type == 'function':
                 modeled_result = self.model(parameters)
-            sigma = self.std_deviation_obj.return_std_dev(modeled_result, parameters)
+            sigma = self.std_deviation_obj.return_std_dev(modeled_value=modeled_result,
+                                                          parameters=parameters)
 
             # get random number according to model and sigma
             samples = self.draw_sample(loc=modeled_result,
@@ -91,7 +92,8 @@ class Likelihood(object):
         else:
             model_data = self.generate_modeled_data(parameters)
 
-        sigma = self.std_deviation_obj.return_std_dev(model_data, parameters)
+        sigma = self.std_deviation_obj.return_std_dev(modeled_value=model_data,
+                                                      parameters=parameters)
         log_likelihood = self.log_likelihood_for_datapoints(model_data, sigma)
 
         return log_likelihood
