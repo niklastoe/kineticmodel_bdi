@@ -196,7 +196,7 @@ def find_necessary_parameters(function, function_kwargs={}):
             success = True
         except KeyError, e:
             missing_parm = e[0]
-            curr_dict[missing_parm] = 0
+            curr_dict[missing_parm] = 1
 
     return curr_dict.keys()
 
