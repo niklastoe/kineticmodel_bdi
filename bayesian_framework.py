@@ -210,23 +210,34 @@ class OrdinaryStandardDeviation(object):
         return self.std_dev
 
 
-class FixPlusFractionalStandardDeviation(object):
+class FixStandardDeviation(object):
 
-    def __init__(self, sigma_name, f_name, format='log'):
+    def __init__(self, sigma_name, format='log'):
         self.sigma_name = sigma_name
-        self.f_name = f_name
         self.format = format
+        self.parameter_names = [self.sigma_name]
 
     def extract_parameters(self, parameters):
-        sigma = parameters[self.sigma_name]
-        f = parameters[self.f_name]
-        parameters = [sigma, f]
+        parameters = [parameters[x] for x in self.parameter_names]
         if self.format == 'log':
             return np.power(10, parameters)
         elif self.format == 'regular':
             return parameters
         else:
             raise NotImplementedError('Can only deal with logarithmic nuisance parameters!')
+
+    def return_std_dev(self, parameters, *args, **kwargs):
+        sigma = self.extract_parameters(parameters)[0]
+        return sigma
+
+
+class FixPlusFractionalStandardDeviation(FixStandardDeviation):
+
+    def __init__(self, sigma_name, f_name, format='log'):
+        self.sigma_name = sigma_name
+        self.f_name = f_name
+        self.format = format
+        self.parameter_names = [self.sigma_name, self.f_name]
 
     @staticmethod
     def calculate_std_deviation(sigma, f, modeled_value):
