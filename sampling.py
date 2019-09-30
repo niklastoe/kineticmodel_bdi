@@ -1,3 +1,4 @@
+import copy
 import emcee
 import numpy as np
 import json
@@ -156,7 +157,7 @@ def logp_factory(dict_of_likelihood_objects, reformat_func, prior_function=None)
         dict_of_functions['prior'] = prior_function
 
     def logp_from_factory(parameters, ignore_prior=False):
-        formatted_parameters = reformat_func(parameters)
+        formatted_parameters = reformat_func(copy.deepcopy(parameters))
         if ignore_prior:
             curr_prior = 0
         else:
