@@ -5,6 +5,7 @@ import json
 import pandas as pd
 
 from workflows.kinetic_modeling.bayesian_framework import find_necessary_parameters, Likelihood
+from workflows.kinetic_modeling.analysis import read_last_autocorrelation
 from dill import PicklingError
 
 
@@ -234,3 +235,13 @@ def sample_until_convergence(sampler, nsteps, starting_pos,
 
     if len(autocorrelation) > 0:
         sampler.autocorrelation = pd.concat(autocorrelation)
+
+
+def read_in_sampler(h5_file):
+    """read in sampler from h5 file and return it
+    note: logp function is just a dummy, you can't sample with it!!"""
+    backend = emcee.backends.HDFBackend(h5_file)
+    sampler = emcee.EnsembleSampler(backend.shape[0], backend.shape[1], dummy_reformatting_function, args=(), backend=backend)
+
+    sampler.parm_names = read_last_autocorrelation(sampler).index
+    return sampler
