@@ -243,5 +243,8 @@ def read_in_sampler(h5_file):
     backend = emcee.backends.HDFBackend(h5_file)
     sampler = emcee.EnsembleSampler(backend.shape[0], backend.shape[1], dummy_reformatting_function, args=(), backend=backend)
 
-    sampler.parm_names = read_last_autocorrelation(sampler).index
+    try:
+        sampler.parm_names = read_last_autocorrelation(sampler).index
+    except:
+        pass
     return sampler
