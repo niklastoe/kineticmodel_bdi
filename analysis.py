@@ -65,9 +65,11 @@ def plot_lines(parameter_sets, evaluation_func, sel_ax):
 
 def posterior_predictive_check(parameter_sets, evaluation_func, sel_ax,
                                plotting=plot_confidence_intervals,
-                               hide_exp_data=False):
-    plotting(parameter_sets, evaluation_func, sel_ax)
-    if not hide_exp_data:
+                               show_model_data=True,
+                               show_exp_data=True):
+    if show_model_data:
+        plotting(parameter_sets, evaluation_func, sel_ax)
+    if show_exp_data:
         evaluation_func('placeholder', return_exp_data=True).plot(style='o', ax=sel_ax, legend=False)
 
 
