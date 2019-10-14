@@ -338,8 +338,8 @@ class KineticModel(object):
         """identify the concentration of individual species if only the sum of their concentrations are known"""
         A, B = self.studied_concentration
         K_Eq = self.determine_equilibrium_constant(A, B, new_parameters)
-        conc_A = concentration_sum / (1 + 10 ** K_Eq)
-        conc_B = concentration_sum / (1 + 10 ** -K_Eq)
+        conc_A = concentration_sum / (1 + 10. ** K_Eq)
+        conc_B = concentration_sum / (1 + 10. ** -K_Eq)
         return {A: conc_A, B: conc_B}
 
     def determine_equilibrium_constant(self, A, B, new_parameters):
