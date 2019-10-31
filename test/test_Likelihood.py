@@ -3,8 +3,8 @@ import pandas as pd
 import unittest as ut
 import xarray as xr
 
-from workflows.kinetic_modeling.test import test_KineticModel
-from workflows.kinetic_modeling.bayesian_framework import Likelihood, OrdinaryStandardDeviation
+from kineticmodel_bdi.test import test_KineticModel
+from kineticmodel_bdi.bayesian_framework import Likelihood, OrdinaryStandardDeviation
 
 
 class TestLikelihoodBase(ut.TestCase):

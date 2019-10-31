@@ -2,7 +2,7 @@ import numpy as np
 import unittest as ut
 import pandas as pd
 
-from workflows.kinetic_modeling import KineticModel
+from kineticmodel_bdi import KineticModel
 
 class CompareKineticResults(ut.TestCase):
 

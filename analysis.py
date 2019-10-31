@@ -7,7 +7,7 @@ import pymc
 import xarray as xr
 
 from workflows.usability.jupyter_compatability import agnostic_tqdm
-from workflows.kinetic_modeling import plot_df_w_nan
+from kineticmodel_bdi import plot_df_w_nan
 
 
 def calc_confidence_intervals(parameter_df, evaluation_func, quantiles=(0.16, 0.5, 0.84)):

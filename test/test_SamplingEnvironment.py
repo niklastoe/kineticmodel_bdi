@@ -1,8 +1,8 @@
 import copy
 import emcee
 import unittest as ut
-from workflows.kinetic_modeling.test import test_Likelihood
-from workflows.kinetic_modeling.sampling import SamplingEnvironment, UniformMinMax
+from kineticmodel_bdi.test import test_Likelihood
+from kineticmodel_bdi.sampling import SamplingEnvironment, UniformMinMax
 
 
 class TestSamplingEnvironment(test_Likelihood.TestLikelihoodFunction):

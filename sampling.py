@@ -4,8 +4,8 @@ import numpy as np
 import json
 import pandas as pd
 
-from workflows.kinetic_modeling.bayesian_framework import find_necessary_parameters, Likelihood
-from workflows.kinetic_modeling.analysis import read_last_autocorrelation
+from kineticmodel_bdi.bayesian_framework import find_necessary_parameters, Likelihood
+from kineticmodel_bdi.analysis import read_last_autocorrelation
 from dill import PicklingError
 
 

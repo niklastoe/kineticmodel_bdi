@@ -6,7 +6,7 @@ import types
 import numpy as np
 import pickle
 
-from workflows.kinetic_modeling import default_data_format, KineticModel, load_pickle_model_specifications
+from kineticmodel_bdi import default_data_format, KineticModel, load_pickle_model_specifications
 from workflows.usability import get_parameter_names_from_function
 
 gaussian_pdf = mlab.normpdf
