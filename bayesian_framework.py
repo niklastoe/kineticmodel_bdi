@@ -7,7 +7,7 @@ import numpy as np
 import pickle
 
 from kineticmodel_bdi import default_data_format, KineticModel, load_pickle_model_specifications
-from workflows.usability import get_parameter_names_from_function
+from kineticmodel_bdi import get_parameter_names_from_function
 
 gaussian_pdf = mlab.normpdf
 laplace_pdf = laplace.pdf

@@ -10,8 +10,6 @@ import numpy as np
 import pandas as pd
 import pickle
 
-from workflows.usability import get_parameter_names_from_function
-
 default_data_format = 'absolute'
 integration_time_scaling_factors = np.array([10 ** i for i in np.arange(-4., -0.)])
 
@@ -483,3 +481,12 @@ def get_rates_dict_guess(func_to_inspect):
 def poly_string(x, y):
     """generate species string for polymer with"""
     return r'T$_%d$P$_%d$-poly' % (x, y)
+
+
+def get_parameter_names_from_function(function):
+    """get list of parameter names from function"""
+    if hasattr(function, 'required_parameters'):
+        parm_names = function.required_parameters
+    else:
+        parm_names = inspect.getargspec(function).args
+    return parm_names
