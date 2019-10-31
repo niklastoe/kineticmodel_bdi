@@ -4,9 +4,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pymc
+from tqdm import tqdm, tqdm_notebook
 import xarray as xr
 
-from workflows.usability.jupyter_compatability import agnostic_tqdm
 from kineticmodel_bdi import plot_df_w_nan
 
 
@@ -202,7 +202,7 @@ def control_factor(model, curr_parameters, sel_parm, reformat_parameters=None):
     if reformat_parameters is not None:
         myparms = reformat_parameters(myparms)
     kin_data = model.model_exp_data(return_only=True, return_df=True,
-                                       new_parameters=myparms)
+                                    new_parameters=myparms)
     org_rate = calc_reaction_rate(kin_data)
 
     change_interval = -0.1
@@ -215,3 +215,28 @@ def control_factor(model, curr_parameters, sel_parm, reformat_parameters=None):
     CF_abs = (new_rate - org_rate) / change_interval
 
     return CF_abs
+
+
+def agnostic_tqdm(*args, **kwargs):
+    """chooses which tqdm version to use and passes all arguments
+    tqdm can be turned off (disable=True), useful if there are many loops etc"""
+
+    def is_notebook():
+        """check if code is executed in jupyter notebook or not"""
+        try:
+            shell = get_ipython().__class__.__name__
+            if shell == 'ZMQInteractiveShell':
+                return True  # Jupyter notebook or qtconsole
+            elif shell == 'TerminalInteractiveShell':
+                return False  # Terminal running IPython
+            else:
+                return False  # Other type (?)
+        except NameError:
+            return False  # Probably standard Python interpreter
+
+    if is_notebook():
+        sel_func = tqdm_notebook    # only works within notebook
+    else:
+        sel_func = tqdm  # only works outside notebook
+
+    return sel_func(*args,  **kwargs)   # all args and kwargs are preserved
