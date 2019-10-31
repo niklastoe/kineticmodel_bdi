@@ -1,2 +1,8 @@
 *.pyc
 .idea/*
+*.h5
+*.pkl
+tutorial_and_poc/absolute_sigma_neg_conc/
+tutorial_and_poc/absolute_sigma_too_low_conc/
+tutorial_and_poc/fractional_f/
+tutorial_and_poc/.ipynb_checkpoints/
