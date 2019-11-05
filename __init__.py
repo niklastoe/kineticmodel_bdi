@@ -449,6 +449,10 @@ def plot_df_w_nan(df, style='-', ax=None, alpha=1.):
     # create axes if necessary
     if ax is None:
         ax = plt.axes()
+
+    if type(df) == pd.Series:
+        df = pd.DataFrame(df)
+        
     for idx, col in enumerate(df):
         if type(ax) == np.ndarray:
             curr_ax = ax[idx]
