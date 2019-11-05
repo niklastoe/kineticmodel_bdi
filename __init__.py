@@ -449,8 +449,14 @@ def plot_df_w_nan(df, style='-', ax=None, alpha=1.):
     # create axes if necessary
     if ax is None:
         ax = plt.axes()
-    for col in df:
-        df[col].dropna().plot(style=style, ax=ax, legend=False, alpha=alpha)
+    for idx, col in enumerate(df):
+        if type(ax) == np.ndarray:
+            curr_ax = ax[idx]
+            curr_color = 'C' + str(idx)
+        else:
+            curr_ax = ax
+            curr_color = None
+        df[col].dropna().plot(style=style, ax=curr_ax, legend=False, alpha=alpha, c=curr_color)
 
 
 def create_rate_slider(rate_key, rates_dict=None, slider_range=5):

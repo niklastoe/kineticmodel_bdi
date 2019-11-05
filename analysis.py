@@ -43,17 +43,27 @@ def plot_uncertainty_intervals(parameter_sets, evaluation_func, sel_ax):
 
 
 def plot_passed_intervals(uncertainty_lo, uncertainty_median, uncertainty_hi, sel_ax):
-    for col in uncertainty_lo:
+    for idx, col in enumerate(uncertainty_lo):
         x = list(uncertainty_lo[col].dropna().index)
         y_lo = list(uncertainty_lo[col].dropna())
         y_hi = list(uncertainty_hi[col].dropna())
-        sel_ax.fill_between(x,
+
+        if type(sel_ax) == np.ndarray:
+            curr_ax = sel_ax[idx]
+        else:
+            curr_ax = sel_ax
+        curr_color = 'C' + str(idx)
+        curr_ax.fill_between(x,
                             y_lo,
                             y_hi,
-                            alpha=0.4)
-    sel_ax.set_prop_cycle(None)
+                            alpha=0.4,
+                            color=curr_color)
+
+    curr_ax.set_prop_cycle(None)
     plot_df_w_nan(uncertainty_median, ax=sel_ax)
-    sel_ax.set_prop_cycle(None)
+    curr_ax.set_prop_cycle(None)
+    plot_df_w_nan(uncertainty_median, ax=sel_ax)
+    curr_ax.set_prop_cycle(None)
 
 
 def plot_lines(parameter_sets, evaluation_func, sel_ax):
@@ -70,7 +80,7 @@ def posterior_predictive_check(parameter_sets, evaluation_func, sel_ax,
     if show_model_data:
         plotting(parameter_sets, evaluation_func, sel_ax)
     if show_exp_data:
-        evaluation_func('placeholder', return_exp_data=True).plot(style='o', ax=sel_ax, legend=False)
+        plot_df_w_nan(evaluation_func('placeholder', return_exp_data=True), ax=sel_ax, style='o')
 
 
 def calc_iid_interval(sampler):
