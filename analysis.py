@@ -10,8 +10,8 @@ import xarray as xr
 from kineticmodel_bdi import plot_df_w_nan
 
 
-def calc_confidence_intervals(parameter_df, evaluation_func, quantiles=(0.16, 0.5, 0.84)):
-    """return confidence intervals given parameters and evaluation function"""
+def calc_uncertainty_intervals(parameter_df, evaluation_func, quantiles=(0.16, 0.5, 0.84)):
+    """return uncertainty intervals given parameters and evaluation function"""
     ppc_samples = []
 
     failed_attempts = 0
@@ -37,22 +37,22 @@ def calc_confidence_intervals(parameter_df, evaluation_func, quantiles=(0.16, 0.
     return dfs
 
 
-def plot_confidence_intervals(parameter_sets, evaluation_func, sel_ax):
-    confidence_lo, confidence_median, confidence_hi = calc_confidence_intervals(parameter_sets, evaluation_func)
-    plot_passed_intervals(confidence_lo, confidence_median, confidence_hi, sel_ax)
+def plot_uncertainty_intervals(parameter_sets, evaluation_func, sel_ax):
+    uncertainty_lo, uncertainty_median, uncertainty_hi = calc_uncertainty_intervals(parameter_sets, evaluation_func)
+    plot_passed_intervals(uncertainty_lo, uncertainty_median, uncertainty_hi, sel_ax)
 
 
-def plot_passed_intervals(confidence_lo, confidence_median, confidence_hi, sel_ax):
-    for col in confidence_lo:
-        x = list(confidence_lo[col].dropna().index)
-        y_lo = list(confidence_lo[col].dropna())
-        y_hi = list(confidence_hi[col].dropna())
+def plot_passed_intervals(uncertainty_lo, uncertainty_median, uncertainty_hi, sel_ax):
+    for col in uncertainty_lo:
+        x = list(uncertainty_lo[col].dropna().index)
+        y_lo = list(uncertainty_lo[col].dropna())
+        y_hi = list(uncertainty_hi[col].dropna())
         sel_ax.fill_between(x,
                             y_lo,
                             y_hi,
                             alpha=0.4)
     sel_ax.set_prop_cycle(None)
-    plot_df_w_nan(confidence_median, ax=sel_ax)
+    plot_df_w_nan(uncertainty_median, ax=sel_ax)
     sel_ax.set_prop_cycle(None)
 
 
@@ -64,7 +64,7 @@ def plot_lines(parameter_sets, evaluation_func, sel_ax):
 
 
 def posterior_predictive_check(parameter_sets, evaluation_func, sel_ax,
-                               plotting=plot_confidence_intervals,
+                               plotting=plot_uncertainty_intervals,
                                show_model_data=True,
                                show_exp_data=True):
     if show_model_data:
