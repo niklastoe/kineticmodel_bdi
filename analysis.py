@@ -54,10 +54,10 @@ def plot_passed_intervals(uncertainty_lo, uncertainty_median, uncertainty_hi, se
             curr_ax = sel_ax
         curr_color = 'C' + str(idx)
         curr_ax.fill_between(x,
-                            y_lo,
-                            y_hi,
-                            alpha=0.4,
-                            color=curr_color)
+                             y_lo,
+                             y_hi,
+                             alpha=0.4,
+                             color=curr_color)
 
     curr_ax.set_prop_cycle(None)
     plot_df_w_nan(uncertainty_median, ax=sel_ax)
@@ -122,7 +122,7 @@ def create_iid_df(sampler, reformat_parameters=None, iid_interval=None):
     burn_in = iid_interval * 5
     iid_points = sampler.get_chain(discard=burn_in, thin=iid_interval)
     iid_lnprobability = sampler.get_log_prob(discard=burn_in, thin=iid_interval, flat=True)
-    iid_blobs = sampler.get_blobs(discard=burn_in, thin=iid_interval)[ :, :, 0].flatten()
+    iid_blobs = sampler.get_blobs(discard=burn_in, thin=iid_interval)[:, :, 0].flatten()
 
     # transform to parameter df
     parameter_df = pd.DataFrame(iid_points.reshape(-1, len(sampler.parm_names)), columns=sampler.parm_names)
@@ -153,7 +153,7 @@ def read_blob_df(blob_list):
         # ...more frequently, there's no bias introduced
         try:
             curr_dict = json.loads(x)
-        except:
+        except ValueError:
             print('Failure: ' + x)
             curr_dict = {x: np.nan for x in curr_dict.keys()}
         all_dicts.append(curr_dict)

@@ -47,7 +47,7 @@ class KineticModel(object):
         """check if there is information on the starting concentrations, otherwise use empty dictionary"""
         try:
             self.starting_concentration = exp_data.starting_concentration
-        except:
+        except AttributeError:
             self.starting_concentration = {}
 
         # set all undefined starting concentrations to 0.0, native odesys requires that

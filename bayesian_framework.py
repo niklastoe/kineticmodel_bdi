@@ -160,7 +160,7 @@ class Likelihood(object):
         likelihood_specifications = self.likelihood_specifications_as_dictionary()
 
         with open(likelihood_specifications_filename, 'wb') as f:
-            pickle.dump(likelihood_specifications , f)
+            pickle.dump(likelihood_specifications, f)
 
         if self.model_type == 'kinetic':
             self.model.pickle_dump_model_specification(model_specifications_filename)

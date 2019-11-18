@@ -112,7 +112,6 @@ class SamplingEnvironment(object):
     def resume_positions_or_create_new_ones(self, sampler):
         """try to restart from the previous state, otherwise use random new starting positions"""
 
-        starting_pos = None
         # if there are previous steps, continue and overwrite generated starting_pos
         try:
             starting_pos = sampler.get_last_sample().coords
@@ -241,10 +240,14 @@ def read_in_sampler(h5_file):
     """read in sampler from h5 file and return it
     note: logp function is just a dummy, you can't sample with it!!"""
     backend = emcee.backends.HDFBackend(h5_file)
-    sampler = emcee.EnsembleSampler(backend.shape[0], backend.shape[1], dummy_reformatting_function, args=(), backend=backend)
+    sampler = emcee.EnsembleSampler(backend.shape[0],
+                                    backend.shape[1],
+                                    dummy_reformatting_function,
+                                    args=(),
+                                    backend=backend)
 
     try:
         sampler.parm_names = read_last_autocorrelation(sampler).index
-    except:
+    except KeyError:
         pass
     return sampler
