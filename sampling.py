@@ -146,7 +146,8 @@ def evaluate_multiple_likelihoods(dict_of_functions, formatted_parameters, curr_
 def logp_factory(dict_of_likelihood_objects, reformat_func, prior_function=None):
     """return a function that evaluates the sum of logps for all inputs"""
 
-    if type(dict_of_likelihood_objects.values()[0]) == Likelihood:
+    # confirm if all entries in dict are indeed instances of Likelihood
+    if np.array([type(x) == Likelihood for x in dict_of_likelihood_objects.values()]).all():
         dict_of_functions = {x: dict_of_likelihood_objects[x].calc_likelihood for x in dict_of_likelihood_objects}
         Likelihood_instance_used_directly = True
     else:
