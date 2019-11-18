@@ -193,8 +193,8 @@ def find_necessary_parameters(function, function_kwargs={}):
         try:
             function(curr_dict, **function_kwargs)
             success = True
-        except KeyError, e:
-            missing_parm = e[0]
+        except KeyError as e:
+            missing_parm = e.args[0]
             curr_dict[missing_parm] = 1
 
     return curr_dict.keys()
