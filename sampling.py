@@ -84,7 +84,7 @@ class SamplingEnvironment(object):
                                     "   dict_of_functions[key] = function_wrapper \n")
 
         my_parm_dict = self.random_start_positions()
-        my_parms = my_parm_dict.keys()
+        my_parms = list(my_parm_dict.keys())
 
         def update_parameter_dict(theta):
             return {my_parms[idx]: x for idx, x in enumerate(theta)}
@@ -116,7 +116,7 @@ class SamplingEnvironment(object):
         try:
             starting_pos = sampler.get_last_sample().coords
         except AttributeError:
-            starting_pos = np.array([self.random_start_positions().values() for x in range(sampler.nwalkers)])
+            starting_pos = np.array([list(self.random_start_positions().values()) for x in range(sampler.nwalkers)])
 
         return starting_pos
 
