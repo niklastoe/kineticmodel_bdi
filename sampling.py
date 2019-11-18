@@ -1,7 +1,6 @@
 import copy
 import emcee
 import numpy as np
-import json
 import pandas as pd
 
 from kineticmodel_bdi.bayesian_framework import find_necessary_parameters, Likelihood
@@ -98,6 +97,15 @@ class SamplingEnvironment(object):
 
         if filename is not None:
             backend = emcee.backends.HDFBackend(filename)
+
+            # store parameter names
+            parameter_names_ds = pd.Series([0] * len(my_parms), index=my_parms)
+            parameter_names_ds.to_hdf(backend.filename, 'parameter_names', format='fixed')
+
+            # store blob names
+            blob_names_ds = pd.Series([0] * len(self.logp_func_parameters.names), index=self.logp_func_parameters.names)
+            blob_names_ds.to_hdf(backend.filename, 'blob_names', format='fixed')
+
         else:
             backend = None
         sampler = emcee.EnsembleSampler(nwalkers, ndims,
@@ -140,7 +148,7 @@ def evaluate_multiple_likelihoods(dict_of_functions, formatted_parameters, curr_
 
     # return the sum of logps and the dictionary
     # also return empty string, otherwise emcee runs into a weird error trying to handle single blob
-    return sum_logp, json.dumps(logps), ''
+    return tuple([sum_logp] + list(logps.values()))
 
 
 def logp_factory(dict_of_likelihood_objects, reformat_func, prior_function=None):
@@ -167,6 +175,9 @@ def logp_factory(dict_of_likelihood_objects, reformat_func, prior_function=None)
         return evaluate_multiple_likelihoods(dict_of_functions, formatted_parameters, curr_prior)
 
     logp_from_factory.Likelihood_instance_used_directly = Likelihood_instance_used_directly
+
+    logp_from_factory.names = list(dict_of_functions.keys())
+
     return logp_from_factory
 
 

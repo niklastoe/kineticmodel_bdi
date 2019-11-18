@@ -41,9 +41,6 @@ class TestSamplingEnvironment(test_Likelihood.TestLikelihoodFunction):
         logp, blobs = posterior_evaluation[0], posterior_evaluation[1:]
         # since the parameters are the true ones (i.e. those that generated the data), logp should be very close to max
         self.assertAlmostEqual(logp, 2*self.likelihood_ordinary_obj.max_likelihood)
-        # confirm that blobs are one string containing json and and empty string (weird thing by emcee)
-        self.assertEqual(type(blobs[0]), str)
-        self.assertEqual(blobs[1], '')
 
     def test_setup_sampler_and_one_step(self):
         nwalkers = 10
