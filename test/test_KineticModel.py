@@ -61,8 +61,18 @@ class TestKineticModelBase(CompareKineticResults):
         c0 = {'A': 1e-6}
         org_results = self.model.evaluate_system(c0)
 
-        native_results = self.model.evaluate_system(c0, self.model.parameters)
-        self.compare_two_kinetic_results(org_results, native_results)
+        # comparison between native odesys and symbolic odesys
+        cvode_results = self.model.evaluate_system(c0, self.model.parameters)
+        self.compare_two_kinetic_results(org_results, cvode_results)
+
+        # comparison between different native odesys implementations
+        self.model.create_native_odesys('odeint')
+        odeint_results = self.model.evaluate_system(c0, self.model.parameters)
+        self.compare_two_kinetic_results(odeint_results, cvode_results)
+
+        self.model.create_native_odesys('gsl')
+        gsl_results = self.model.evaluate_system(c0, self.model.parameters)
+        self.compare_two_kinetic_results(gsl_results, cvode_results)
 
     def test_observables(self):
         """monitoring educt or product needs to yield the same result"""

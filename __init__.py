@@ -412,10 +412,10 @@ class KineticModel(object):
 
         return flattened_array[~np.isnan(flattened_array)]
 
-    def create_native_odesys(self):
+    def create_native_odesys(self, ode_solver='cvode'):
         """create a system of the ordinary differential equations in native C++ code.
         It is much faster than the other one for numerous sets of parameters but requires some time for setup."""
-        self.native_odesys = native_sys['cvode'].from_other(self.odesys)
+        self.native_odesys = native_sys[ode_solver].from_other(self.odesys)
 
     def pickle_dump_model_specification(self, filename):
         """get all model specifications and pickle them as one dictionary
