@@ -1,6 +1,5 @@
-import matplotlib.mlab as mlab
 import pandas as pd
-from scipy.stats import laplace
+from scipy.stats import laplace, norm
 import types
 
 import numpy as np
@@ -9,7 +8,7 @@ import pickle
 from kineticmodel_bdi import default_data_format, KineticModel, load_pickle_model_specifications
 from kineticmodel_bdi import get_parameter_names_from_function
 
-gaussian_pdf = mlab.normpdf
+gaussian_pdf = norm.pdf
 laplace_pdf = laplace.pdf
 
 
