@@ -1,6 +1,5 @@
-import matplotlib.mlab as mlab
 import pandas as pd
-from scipy.stats import laplace
+from scipy.stats import laplace, norm
 import types
 
 import numpy as np
@@ -9,7 +8,7 @@ import pickle
 from kineticmodel_bdi import default_data_format, KineticModel, load_pickle_model_specifications
 from kineticmodel_bdi import get_parameter_names_from_function
 
-gaussian_pdf = mlab.normpdf
+gaussian_pdf = norm.pdf
 laplace_pdf = laplace.pdf
 
 
@@ -169,14 +168,16 @@ class Likelihood(object):
                 pickle.dump(self.model, f)
 
 
-def load_pickle_likelihood_specifications(likelihood_specifications_filename, model_specifications_filename):
+def load_pickle_likelihood_specifications(likelihood_specifications_filename,
+                                          model_specifications_filename,
+                                          ode_solver='cvode'):
     """create a KineticModel based on the """
     with open(likelihood_specifications_filename, 'rb') as f:
         likelihood_specifications = pickle.load(f)
 
     try:
         model = load_pickle_model_specifications(model_specifications_filename)
-        model.create_native_odesys()
+        model.create_native_odesys(ode_solver)
     except TypeError:
         with open(model_specifications_filename, 'rb') as f:
             model = pickle.load(f)
@@ -194,8 +195,8 @@ def find_necessary_parameters(function, function_kwargs={}):
         try:
             function(curr_dict, **function_kwargs)
             success = True
-        except KeyError, e:
-            missing_parm = e[0]
+        except KeyError as e:
+            missing_parm = e.args[0]
             curr_dict[missing_parm] = 1
 
     return curr_dict.keys()

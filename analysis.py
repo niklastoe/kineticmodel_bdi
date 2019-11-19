@@ -1,5 +1,4 @@
 import copy
-import json
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -122,12 +121,13 @@ def create_iid_df(sampler, reformat_parameters=None, iid_interval=None):
     burn_in = iid_interval * 5
     iid_points = sampler.get_chain(discard=burn_in, thin=iid_interval)
     iid_lnprobability = sampler.get_log_prob(discard=burn_in, thin=iid_interval, flat=True)
-    iid_blobs = sampler.get_blobs(discard=burn_in, thin=iid_interval)[:, :, 0].flatten()
+    iid_blobs = sampler.get_blobs(discard=burn_in, thin=iid_interval)
 
     # transform to parameter df
-    parameter_df = pd.DataFrame(iid_points.reshape(-1, len(sampler.parm_names)), columns=sampler.parm_names)
-
-    blob_df = read_blob_df(iid_blobs)
+    parm_names = get_parameter_names(sampler)
+    parameter_df = pd.DataFrame(iid_points.reshape(-1, len(parm_names)), columns=parm_names)
+    blob_names = pd.read_hdf(sampler.backend.filename, key='blob_names').index
+    blob_df = pd.DataFrame(iid_blobs.reshape(-1, len(blob_names)), columns=blob_names)
 
     if reformat_parameters is not None:
         parameter_df = pd.DataFrame([reformat_parameters(x[1]) for x in parameter_df.iterrows()])
@@ -138,27 +138,8 @@ def create_iid_df(sampler, reformat_parameters=None, iid_interval=None):
     return full_df
 
 
-def read_blob_df(blob_list):
-    """return DataFrame for blobs passed as a flat list"""
-    all_dicts = []
-    for x in blob_list:
-        # sometimes, the closing bracket is missing
-        # maybe even more is lost but since those are decimals, we do not care much
-        if x[-1] != '}':
-            x += '}'
-
-        # sometimes, reading in the blobs will fail nevertheless because the string in blobs is cutoff
-        # in these cases, just set everything to NaN and discard the points
-        # we have enough points, as long as we do not expect that points in a certain regime cause this error...
-        # ...more frequently, there's no bias introduced
-        try:
-            curr_dict = json.loads(x)
-        except ValueError:
-            print('Failure: ' + x)
-            curr_dict = {x: np.nan for x in curr_dict.keys()}
-        all_dicts.append(curr_dict)
-    blob_df = pd.DataFrame(all_dicts)
-    return blob_df
+def get_parameter_names(sampler):
+    return pd.read_hdf(sampler.backend.filename, key='parameter_names').index
 
 
 def calc_gelman_rubin(sampler_a, sampler_b):

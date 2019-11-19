@@ -1,11 +1,9 @@
 import copy
 import emcee
 import numpy as np
-import json
 import pandas as pd
 
 from kineticmodel_bdi.bayesian_framework import find_necessary_parameters, Likelihood
-from kineticmodel_bdi.analysis import read_last_autocorrelation
 from dill import PicklingError
 
 
@@ -84,7 +82,7 @@ class SamplingEnvironment(object):
                                     "   dict_of_functions[key] = function_wrapper \n")
 
         my_parm_dict = self.random_start_positions()
-        my_parms = my_parm_dict.keys()
+        my_parms = list(my_parm_dict.keys())
 
         def update_parameter_dict(theta):
             return {my_parms[idx]: x for idx, x in enumerate(theta)}
@@ -98,6 +96,15 @@ class SamplingEnvironment(object):
 
         if filename is not None:
             backend = emcee.backends.HDFBackend(filename)
+
+            # store parameter names
+            parameter_names_ds = pd.Series([0] * len(my_parms), index=my_parms)
+            parameter_names_ds.to_hdf(backend.filename, 'parameter_names', format='fixed')
+
+            # store blob names
+            blob_names_ds = pd.Series([0] * len(self.logp_func_parameters.names), index=self.logp_func_parameters.names)
+            blob_names_ds.to_hdf(backend.filename, 'blob_names', format='fixed')
+
         else:
             backend = None
         sampler = emcee.EnsembleSampler(nwalkers, ndims,
@@ -116,7 +123,7 @@ class SamplingEnvironment(object):
         try:
             starting_pos = sampler.get_last_sample().coords
         except AttributeError:
-            starting_pos = np.array([self.random_start_positions().values() for x in range(sampler.nwalkers)])
+            starting_pos = np.array([list(self.random_start_positions().values()) for x in range(sampler.nwalkers)])
 
         return starting_pos
 
@@ -140,13 +147,14 @@ def evaluate_multiple_likelihoods(dict_of_functions, formatted_parameters, curr_
 
     # return the sum of logps and the dictionary
     # also return empty string, otherwise emcee runs into a weird error trying to handle single blob
-    return sum_logp, json.dumps(logps), ''
+    return tuple([sum_logp] + list(logps.values()))
 
 
 def logp_factory(dict_of_likelihood_objects, reformat_func, prior_function=None):
     """return a function that evaluates the sum of logps for all inputs"""
 
-    if type(dict_of_likelihood_objects.values()[0]) == Likelihood:
+    # confirm if all entries in dict are indeed instances of Likelihood
+    if np.array([type(x) == Likelihood for x in dict_of_likelihood_objects.values()]).all():
         dict_of_functions = {x: dict_of_likelihood_objects[x].calc_likelihood for x in dict_of_likelihood_objects}
         Likelihood_instance_used_directly = True
     else:
@@ -166,6 +174,9 @@ def logp_factory(dict_of_likelihood_objects, reformat_func, prior_function=None)
         return evaluate_multiple_likelihoods(dict_of_functions, formatted_parameters, curr_prior)
 
     logp_from_factory.Likelihood_instance_used_directly = Likelihood_instance_used_directly
+
+    logp_from_factory.names = list(dict_of_functions.keys())
+
     return logp_from_factory
 
 
@@ -246,8 +257,4 @@ def read_in_sampler(h5_file):
                                     args=(),
                                     backend=backend)
 
-    try:
-        sampler.parm_names = read_last_autocorrelation(sampler).index
-    except KeyError:
-        pass
     return sampler

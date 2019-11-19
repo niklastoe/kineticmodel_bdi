@@ -412,10 +412,17 @@ class KineticModel(object):
 
         return flattened_array[~np.isnan(flattened_array)]
 
-    def create_native_odesys(self):
+    def create_native_odesys(self, ode_solver='cvode'):
         """create a system of the ordinary differential equations in native C++ code.
         It is much faster than the other one for numerous sets of parameters but requires some time for setup."""
-        self.native_odesys = native_sys['cvode'].from_other(self.odesys)
+        try:
+            self.native_odesys = native_sys[ode_solver].from_other(self.odesys)
+        except KeyError:
+            raise KeyError('Available integrators: "cvode", "odeint" or "gsl"!')
+        except ValueError:
+            raise ValueError('Apparently, you are facing problems with this particular integrator (%s). '
+                             'Try one of the other ones. Available: "cvode", "odeint" or "gsl". '
+                             'Refer to https://github.com/bjodah/pyodesys for more information'  % ode_solver)
 
     def pickle_dump_model_specification(self, filename):
         """get all model specifications and pickle them as one dictionary
