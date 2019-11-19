@@ -42,8 +42,8 @@ class SamplingEnvironment(object):
         """return sum of log priors for a dictionary of prior_functions"""
 
         prior = 0
-        for sel_parameter in parameters.keys():
-            if sel_parameter in self.prior_distributions.keys():
+        for sel_parameter in parameters:
+            if sel_parameter in self.prior_distributions:
                 prior += self.prior_distributions[sel_parameter].logpdf(parameters[sel_parameter])
 
         return prior
