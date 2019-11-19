@@ -168,14 +168,16 @@ class Likelihood(object):
                 pickle.dump(self.model, f)
 
 
-def load_pickle_likelihood_specifications(likelihood_specifications_filename, model_specifications_filename):
+def load_pickle_likelihood_specifications(likelihood_specifications_filename,
+                                          model_specifications_filename,
+                                          ode_solver='cvode'):
     """create a KineticModel based on the """
     with open(likelihood_specifications_filename, 'rb') as f:
         likelihood_specifications = pickle.load(f)
 
     try:
         model = load_pickle_model_specifications(model_specifications_filename)
-        model.create_native_odesys()
+        model.create_native_odesys(ode_solver)
     except TypeError:
         with open(model_specifications_filename, 'rb') as f:
             model = pickle.load(f)
