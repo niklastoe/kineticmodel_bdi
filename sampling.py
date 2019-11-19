@@ -4,7 +4,6 @@ import numpy as np
 import pandas as pd
 
 from kineticmodel_bdi.bayesian_framework import find_necessary_parameters, Likelihood
-from kineticmodel_bdi.analysis import read_last_autocorrelation
 from dill import PicklingError
 
 
@@ -258,8 +257,4 @@ def read_in_sampler(h5_file):
                                     args=(),
                                     backend=backend)
 
-    try:
-        sampler.parm_names = read_last_autocorrelation(sampler).index
-    except KeyError:
-        pass
     return sampler
