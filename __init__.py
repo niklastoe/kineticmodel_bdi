@@ -467,7 +467,9 @@ def plot_df_w_nan(df, style='-', ax=None, alpha=1.):
         else:
             curr_ax = ax
             curr_color = None
-        df[col].dropna().plot(style=style, ax=curr_ax, legend=False, alpha=alpha, c=curr_color)
+        df[col].dropna().plot(style=style, ax=curr_ax, legend=False, alpha=alpha, c=curr_color,
+                              markeredgecolor='w',
+                              markersize = 10)
 
 
 def create_rate_slider(rate_key, rates_dict=None, slider_range=5):
