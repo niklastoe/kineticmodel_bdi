@@ -45,14 +45,14 @@ Download the code/clone the repository. Don't forget to add the path to your cop
 
 ## Dependencies (only those not included in an anaconda installation by default)
 
-* chempy (create ODE systems)
-* pyodesys (solve ODE systems)
-* emcee (MCMC sampling)
-* pymc (Gelman-Rubin diagnostics)
-* pytables (h5 files manipulation)
+* [`chempy`](https://github.com/bjodah/chempy) (create ODE systems)
+* [`pyodesys`](https://github.com/bjodah/pyodesys) (solve ODE systems)
+* [`emcee`](https://github.com/dfm/emcee) (MCMC sampling)
+* [`pymc`](https://github.com/pymc-devs/pymc) (Gelman-Rubin diagnostics)
+* [`pytables`](http://www.pytables.org/) (h5 files manipulation)
 
 Only for parallelization:
-* dill
-* pathos
+* [`dill`](https://github.com/uqfoundation/dill)
+* [`pathos`](https://github.com/uqfoundation/pathos)
 
 For you convenience, you can create a new conda environment with all necessary dependencies from `environment_p2.yml`.
