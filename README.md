@@ -1,5 +1,5 @@
 # kineticmodel_bdi
-Bayesian data integration for kinetic models written in Python
+Bayesian data integration for kinetic models written in Python.
 
 # Usage / Tutorial
 
@@ -12,9 +12,9 @@ Users can easily modify the kinetic models shown there to their needs.
 This notebook is just for reference, you can find the synthetic data as shown in the SI of the paper in ` 	observed_kin_data.csv, observed_eq_adsorption_data.csv, observed_td_adsorption_data.csv`.
 
 2. The definition of the kinetic models, priors etc. is found in `infer_parameters.ipynb`.
-All the heavy lifting, i.e. the inference itself, is also done within this notebook.
-Running all of it can take several hours or up to 1-2 days.
-Upon completion, you will find the MCMC chains in `.h5` files. 
+The inference itself is also done within this notebook.
+Running all of it can take several hours or up to 1-2 days on your desktop machine.
+Upon completion, you will find the MCMC chains stored in `.h5` files. 
 These are relatively large (up to a few hundred MB) so we don't share them via GitHub.
 If you face a problem at this stage, feel free to contact me and I will share my results with you.
 `LH_infer_parameters.ipynb` is analogous but with slightly different settings and priors for the LH mechanism.
