@@ -440,6 +440,42 @@ class KineticModel(object):
         model_specifications = {x: getattr(self, x) for x in specification_names}
         return model_specifications
 
+    def latexed_system_ode(self):
+        """return the system of differential equations in a latexed form.
+        This will need some manual improvements but those are easy to do"""
+
+        # organize latexed names for molecules and parameters
+        substances = pd.Series({'y_' + str(idx): '[' + str(x) + ']' for idx, x in enumerate(self.model.substance_names())})
+        parameters = pd.Series({'p_' + str(idx): str(x) for idx, x in enumerate(self.odesys.param_names)})
+
+        # start align environment
+        latexed_ode = ['\\begin{align}']
+
+        # pyodesys allows to show strings of the differential equations
+        for idx, org_x in enumerate(self.odesys.exprs):
+            x = str(org_x)
+
+            # replace internal naming with latexed names
+            for y in substances.index:
+                x = x.replace(y, substances[y])
+
+            for y in parameters.index:
+                x = x.replace(y, parameters[y])
+
+            # adapt math signs to latex
+            x = x.replace('**', '^')
+            x = x.replace('*', '')
+
+            # format everything nicely as aligned equations
+            x = '\\frac{d ' + substances.values[idx] + '}{dt} &= ' + x + ' \\'
+
+            latexed_ode.append(x)
+
+        # finish of by ending align environment
+        latexed_ode.append('\\end{align}')
+
+        return latexed_ode
+
 
 def load_pickle_model_specifications(filename):
     """create a KineticModel based on the """
