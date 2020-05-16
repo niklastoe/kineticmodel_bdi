@@ -1,8 +1,9 @@
-import numpy as np
 import unittest as ut
-import pandas as pd
 
+import numpy as np
+import pandas as pd
 from kineticmodel_bdi import KineticModel
+
 
 class CompareKineticResults(ut.TestCase):
 
@@ -11,6 +12,7 @@ class CompareKineticResults(ut.TestCase):
         self.assertAlmostEqual(diff.sum().sum(), 0., delta=1e-11)
         self.assertLess(diff.max().max(), 1e-11)
         self.assertLess(abs(diff.min().min()), 1e-11)
+
 
 class TestKineticModelBase(CompareKineticResults):
     __test__ = False
@@ -98,8 +100,8 @@ class TestKineticModelFirst(TestKineticModelBase):
         return [[{'A': 1}, {'P': 1}, 'k']]
 
     def integrated_rate_law(self, A0, t, k):
-        k_applied = 10**k
-        At = A0 * np.exp(-k_applied*t)
+        k_applied = 10 ** k
+        At = A0 * np.exp(-k_applied * t)
         return At
 
 
@@ -113,8 +115,8 @@ class TestKineticModelSecond(TestKineticModelBase):
         return [[{'A': 2}, {'P': 1, 'A': 1}, 'k']]
 
     def integrated_rate_law(self, A0, t, k):
-        k_applied = 10**k
-        At = 1. / (k_applied*t + 1./A0)
+        k_applied = 10 ** k
+        At = 1. / (k_applied * t + 1. / A0)
         return At
 
 
@@ -126,7 +128,7 @@ class TestKineticModelEquilibrium(CompareKineticResults):
 
         times = np.arange(0, 3600, 60)
         conc_A = np.array([10e-6] * len(times))
-        exp_data = pd.DataFrame({10e-6: conc_A, 50e-6: 5*conc_A}, index=times)
+        exp_data = pd.DataFrame({10e-6: conc_A, 50e-6: 5 * conc_A}, index=times)
         exp_data.columns.name = ['A', 'D']
 
         reactions = [[{'A': 1}, {'D': 1}, 'k_AD'],

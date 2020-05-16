@@ -1,14 +1,15 @@
-from chempy import Reaction, ReactionSystem
-from chempy.kinetics.ode import get_odesys
-from pyodesys.native import native_sys
-from collections import defaultdict
 import copy
 import inspect
+import pickle
+from collections import defaultdict
+
 import ipywidgets
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import pickle
+from chempy import Reaction, ReactionSystem
+from chempy.kinetics.ode import get_odesys
+from pyodesys.native import native_sys
 
 default_data_format = 'absolute'
 integration_time_scaling_factors = np.array([10 ** i for i in np.arange(-4., -0.)])
@@ -65,7 +66,7 @@ class KineticModel(object):
 
         for x in self.species_w_variable_starting_concentration:
             species_name = x[:-1]
-            curr_starting_concentration[species_name] = 10**parameters[x]
+            curr_starting_concentration[species_name] = 10 ** parameters[x]
 
         return curr_starting_concentration
 
@@ -422,7 +423,7 @@ class KineticModel(object):
         except ValueError:
             raise ValueError('Apparently, you are facing problems with this particular integrator (%s). '
                              'Try one of the other ones. Available: "cvode", "odeint" or "gsl". '
-                             'Refer to https://github.com/bjodah/pyodesys for more information'  % ode_solver)
+                             'Refer to https://github.com/bjodah/pyodesys for more information' % ode_solver)
 
     def pickle_dump_model_specification(self, filename):
         """get all model specifications and pickle them as one dictionary
@@ -495,7 +496,7 @@ def plot_df_w_nan(df, style='-', ax=None, alpha=1.):
 
     if type(df) == pd.Series:
         df = pd.DataFrame(df)
-        
+
     for idx, col in enumerate(df):
         if type(ax) == np.ndarray:
             curr_ax = ax[idx]
@@ -505,7 +506,7 @@ def plot_df_w_nan(df, style='-', ax=None, alpha=1.):
             curr_color = None
         df[col].dropna().plot(style=style, ax=curr_ax, legend=False, alpha=alpha, c=curr_color,
                               markeredgecolor='w',
-                              markersize = 10)
+                              markersize=10)
 
 
 def create_rate_slider(rate_key, rates_dict=None, slider_range=5):

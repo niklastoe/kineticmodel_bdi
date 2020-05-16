@@ -56,7 +56,6 @@ start_rates_ER = pd.Series({'KA': 5.700000,
                             'k_LH': 7.668636,
                             'k_ER': 1.100000})
 
-
 start_rates_LH = pd.Series({'KA': 5.700000,
                             'S0': -6.568636,
                             'k': -12.037272,

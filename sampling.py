@@ -1,10 +1,10 @@
 import copy
+
 import emcee
 import numpy as np
 import pandas as pd
-
-from kineticmodel_bdi.bayesian_framework import find_necessary_parameters, Likelihood
 from dill import PicklingError
+from kineticmodel_bdi.bayesian_framework import find_necessary_parameters, Likelihood
 
 
 def dummy_reformatting_function(parameters):

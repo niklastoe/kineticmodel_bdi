@@ -1,8 +1,9 @@
 import copy
-import emcee
 import unittest as ut
-from kineticmodel_bdi.tests import test_Likelihood
+
+import emcee
 from kineticmodel_bdi.sampling import SamplingEnvironment, UniformMinMax
+from kineticmodel_bdi.tests import test_Likelihood
 
 
 class TestSamplingEnvironment(test_Likelihood.TestLikelihoodFunction):
@@ -12,7 +13,7 @@ class TestSamplingEnvironment(test_Likelihood.TestLikelihoodFunction):
         super(TestSamplingEnvironment, self).__init__(*args, **kwargs)
 
         prior_m = UniformMinMax(-1e-10, 1e-10)
-        prior_b = UniformMinMax(1-1e-10, 1+1e-10)
+        prior_b = UniformMinMax(1 - 1e-10, 1 + 1e-10)
         prior_distributions = {'m': prior_m,
                                'b': prior_b}
 
@@ -40,7 +41,7 @@ class TestSamplingEnvironment(test_Likelihood.TestLikelihoodFunction):
         posterior_evaluation = self.env.logp_func_parameters(self.get_parameters())
         logp, blobs = posterior_evaluation[0], posterior_evaluation[1:]
         # since the parameters are the true ones (i.e. those that generated the data), logp should be very close to max
-        self.assertAlmostEqual(logp, 2*self.likelihood_ordinary_obj.max_likelihood)
+        self.assertAlmostEqual(logp, 2 * self.likelihood_ordinary_obj.max_likelihood)
 
     def test_setup_sampler_and_one_step(self):
         nwalkers = 10

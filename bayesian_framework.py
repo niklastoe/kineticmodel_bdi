@@ -1,12 +1,11 @@
-import pandas as pd
-from scipy.stats import laplace, norm
+import pickle
 import types
 
 import numpy as np
-import pickle
-
+import pandas as pd
 from kineticmodel_bdi import default_data_format, KineticModel, load_pickle_model_specifications
 from kineticmodel_bdi import get_parameter_names_from_function
+from scipy.stats import laplace, norm
 
 gaussian_pdf = norm.pdf
 laplace_pdf = laplace.pdf

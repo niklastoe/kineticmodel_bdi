@@ -1,10 +1,10 @@
+import unittest as ut
+
 import numpy as np
 import pandas as pd
-import unittest as ut
 import xarray as xr
-
-from kineticmodel_bdi.tests import test_KineticModel
 from kineticmodel_bdi.bayesian_framework import Likelihood, OrdinaryStandardDeviation
+from kineticmodel_bdi.tests import test_KineticModel
 
 
 class TestLikelihoodBase(ut.TestCase):
@@ -45,9 +45,10 @@ class TestLikelihoodBase(ut.TestCase):
         std = samples.std(dim='samples').to_dataframe()
 
         # mu should be close to 0 (input parameters used for posterior prediction)
-        self.assertAlmostEqual(mu.mean().mean(), 0, delta=self.likelihood_ordinary_obj.exp_data_formatted.max().max() * 5e-3)
+        self.assertAlmostEqual(mu.mean().mean(), 0,
+                               delta=self.likelihood_ordinary_obj.exp_data_formatted.max().max() * 5e-3)
         # sampled standard deviation should not differ by more than 10% from real standard deviation
-        self.assertAlmostEqual(std.mean().mean(), self.sel_std_dev, delta=self.sel_std_dev*0.1)
+        self.assertAlmostEqual(std.mean().mean(), self.sel_std_dev, delta=self.sel_std_dev * 0.1)
 
 
 class TestLikelihoodKineticModel(TestLikelihoodBase, test_KineticModel.TestKineticModelFirst):
@@ -69,7 +70,7 @@ class TestLikelihoodFunction(TestLikelihoodBase):
         self.range = np.arange(0, 10, 0.5)
 
         def line(parameters):
-            return self.range * 10**parameters['m'] + 10**parameters['b']
+            return self.range * 10 ** parameters['m'] + 10 ** parameters['b']
 
         def get_line_parameters():
             return {'m': 0., 'b': 1.}
@@ -80,6 +81,7 @@ class TestLikelihoodFunction(TestLikelihoodBase):
         self.likelihood_ordinary_obj = Likelihood(line,
                                                   exp_data_formatted=exp_data_formatted,
                                                   std_deviation_obj=OrdinaryStandardDeviation(self.sel_std_dev))
+
 
 if __name__ == '__main__':
     ut.main(verbosity=2)

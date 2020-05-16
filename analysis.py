@@ -1,12 +1,12 @@
 import copy
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pymc
-from tqdm import tqdm, tqdm_notebook
 import xarray as xr
-
 from kineticmodel_bdi import plot_df_w_nan
+from tqdm import tqdm, tqdm_notebook
 
 
 def calc_uncertainty_intervals(parameter_df, evaluation_func, quantiles=(0.16, 0.5, 0.84)):
@@ -83,7 +83,6 @@ def posterior_predictive_check(parameter_sets, evaluation_func, sel_ax,
 
 
 def calc_iid_interval(sampler):
-
     acors = None
     # check if sampler has backend filename
     if hasattr(sampler.backend, 'filename'):
@@ -226,8 +225,8 @@ def agnostic_tqdm(*args, **kwargs):
             return False  # Probably standard Python interpreter
 
     if is_notebook():
-        sel_func = tqdm_notebook    # only works within notebook
+        sel_func = tqdm_notebook  # only works within notebook
     else:
         sel_func = tqdm  # only works outside notebook
 
-    return sel_func(*args,  **kwargs)   # all args and kwargs are preserved
+    return sel_func(*args, **kwargs)  # all args and kwargs are preserved
