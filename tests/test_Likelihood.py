@@ -3,7 +3,7 @@ import pandas as pd
 import unittest as ut
 import xarray as xr
 
-from kineticmodel_bdi.test import test_KineticModel
+from kineticmodel_bdi.tests import test_KineticModel
 from kineticmodel_bdi.bayesian_framework import Likelihood, OrdinaryStandardDeviation
 
 

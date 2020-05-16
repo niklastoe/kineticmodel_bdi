@@ -1,7 +1,7 @@
 import copy
 import emcee
 import unittest as ut
-from kineticmodel_bdi.test import test_Likelihood
+from kineticmodel_bdi.tests import test_Likelihood
 from kineticmodel_bdi.sampling import SamplingEnvironment, UniformMinMax
 
 
