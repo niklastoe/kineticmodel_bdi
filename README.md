@@ -57,3 +57,21 @@ Only for parallelization:
 * [`pathos`](https://github.com/uqfoundation/pathos)
 
 For you convenience, you can create a new conda environment with all necessary dependencies from `environment_p2.yml`.
+
+# Citation
+
+
+```
+@article{doi:10.1021/acsomega.0c01109,
+author = {Tötsch, Niklas and Hoffmann, Daniel},
+title = {Bayesian Data Integration Questions Classic Study on Protease Self-Digest Kinetics},
+journal = {ACS Omega},
+volume = {0},
+number = {0},
+pages = {null},
+year = {0},
+doi = {10.1021/acsomega.0c01109},
+URL = {https://doi.org/10.1021/acsomega.0c01109},
+eprint = {https://doi.org/10.1021/acsomega.0c01109}
+}
+```
