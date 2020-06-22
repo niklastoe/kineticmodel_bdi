@@ -1,5 +1,6 @@
 # kineticmodel_bdi
 Bayesian data integration for kinetic models written in Python.
+In our [publication in ACS Omega](https://pubs.acs.org/doi/10.1021/acsomega.0c01109) we introduce the theory of our approach and evaluate different reaction mechanisms for the acceleration of trypsin autolysis caused by silica surfaces.
 
 # Usage / Tutorial
 
