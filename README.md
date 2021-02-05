@@ -62,7 +62,7 @@ For you convenience, you can create a new conda environment with all necessary d
 
 
 ```
-@article{doi:10.1021/acsomega.0c01109,
+@article{toetsch2020bayesian,
 author = {Tötsch, Niklas and Hoffmann, Daniel},
 title = {Bayesian Data Integration Questions Classic Study on Protease Self-Digest Kinetics},
 journal = {ACS Omega},
